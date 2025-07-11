@@ -10,7 +10,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Auth\Events\Registered;
 
 // class User extends Authenticatable
-class User extends Authenticatable implements MustVerifyEmail
+class Administrator extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 

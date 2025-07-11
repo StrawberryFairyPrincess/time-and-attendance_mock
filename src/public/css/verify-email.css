@@ -1,0 +1,51 @@
+.flex{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.content {
+    max-width: 1230px;
+}
+.text{
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.verify,
+.mail{
+    margin-top: 60px;
+    text-align: center;
+}
+.verify button,
+.mail button{
+
+    font-family: "Inter", sans-serif;
+    cursor: pointer;
+    margin: 0 auto;
+}
+.verify button {
+    width: 260px;
+    height: 65px;
+    border-radius: 10px;
+    background: #D9D9D9;
+    border: solid 1px #000000;
+    font-size: 24px;
+    font-weight: 700;
+}
+.mail button {
+    background: white;
+    color: #0073CC;
+    border: none;
+    font-size: 20px;
+    font-weight: 400;
+}
+
+.form__message {
+    height: 20px;
+    color: #FF5555;
+    text-align: left;
+    text-align: center;
+}
