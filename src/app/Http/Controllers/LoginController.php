@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\LoginRequest;
 use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
@@ -14,7 +15,7 @@ class LoginController extends Controller
     }
 
     // ログイン処理
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
         $credentials = $request->only([
             'email',
@@ -25,13 +26,12 @@ class LoginController extends Controller
         if (Auth::guard('members')->attempt($credentials)) {
             // ログインしたら出勤登録画面にリダイレクト
             return redirect('/attendance')->with([
-                'login_msg' => 'ログインしました。',
+                'login_msg' => 'ログインしました。', // ビューの{{ $message }}に展開
             ]);
         }
 
         return back()->withErrors([
-            // ビューの{{ $message }}に展開
-            'login' => ['ログインに失敗しました'],
+            'login' => ['ログインに失敗しました'], // ビューの{{ $error }}に展開
         ]);
     }
 
@@ -44,7 +44,7 @@ class LoginController extends Controller
 
         // ログアウトしたらログインフォームにリダイレクト
         return redirect('/login')->with([
-            'auth' => ['ログアウトしました'],
+            'auth' => ['ログアウトしました'], // ビューの{{ $message }}に展開
         ]);
     }
 

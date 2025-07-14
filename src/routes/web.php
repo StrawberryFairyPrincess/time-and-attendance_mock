@@ -9,65 +9,21 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\GeneralController;
 
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
-
-
-
-
-
-// Route::middleware(['auth', 'verified'])->group(function () {
-
-//     // Route::prefix('/mypage')->group(function () {
-
-//     //     // ヘッダーのリンク表示（マイページ(プロフィール画面)）
-//     //     Route::get('', [UserController::class, 'mypage']);
-
-//     //     Route::prefix('/profile')->group(function () {
-
-//     //         // プロフィール編集画面(設定画面)を表示
-//     //         Route::get('', [UserController::class, 'profile']);
-
-//     //         // プロフィール編集画面(設定画面)を更新
-//     //         Route::post('', [UserController::class, 'update']);
-
-//     //     });
-
-//     // });
-
-
-//     // Route::prefix('/purchase/{item_id}')->group(function () {
-
-//     //     // 商品購入画面の表示
-//     //     Route::get('', [ItemController::class, 'purchase']);
-
-//     //     // 商品の購入
-//     //     Route::post('', [UserController::class, 'purchase']);
-
-//     // });
-
-
-// });
-
-
-
 // 管理者
 use App\Http\Controllers\Admin;
 Route::prefix('/admin')->group(function () {
 
-    // ログインフォームの表示
-    Route::get('/login', [Admin\LoginController::class, 'index']);
-    // ログインを試みる
-    Route::post('/login', [Admin\LoginController::class, 'login']);
-    // ログアウトを行ってログインフォームにリダイレクト
+    Route::prefix('/login')->group(function () {
+
+        // ログイン画面の表示
+        Route::get('', [Admin\LoginController::class, 'index'])->name('admin.login');
+        // ログインする
+        Route::post('', [Admin\LoginController::class, 'login']);
+
+    });
+
+
+    // ログアウトしてログイン画面にリダイレクト
     Route::get('/logout', [Admin\LoginController::class, 'logout']);
 
 });
@@ -75,29 +31,41 @@ Route::prefix('/admin')->group(function () {
 Route::prefix('/admin')->middleware('auth:administrators')->group(function () {
 
     // 勤怠一覧画面(管理者)の表示
-    Route::get('/attendances',[Admin\IndexController::class, 'index']);
+    Route::get('/attendances',[Admin\DisplayController::class, 'index']);
 
 });
-
 
 // 一般ユーザ
 use App\Http\Controllers;
-Route::get('/register', [Controllers\LoginController::class, 'register']);
-Route::get('login', [Controllers\LoginController::class, 'index']);
-Route::post('login', [Controllers\LoginController::class, 'login']);
-Route::get('logout', [Controllers\LoginController::class, 'logout']);
-// 未認証の場合にログインフォームにリダイレクト
-Route::prefix('/')->middleware('auth.general:members')->group(function () {
+Route::prefix('/')->group(function () {
 
-    // 出勤登録画面の表示
-    Route::get('attendance', [Controllers\IndexController::class, 'clock']);
+    // ユーザ登録画面の表示
+    Route::get('register', [Controllers\LoginController::class, 'register']);
 
-    // 勤怠一覧画面(一般ユーザ)の表示
-    Route::get('attendance/list', [Controllers\IndexController::class, 'list']);
+    Route::prefix('login')->group(function () {
+
+        // ログイン画面の表示
+        Route::get('', [Controllers\LoginController::class, 'index'])->name('login');
+        // ログインする
+        Route::post('', [Controllers\LoginController::class, 'login']);
+
+    });
+
+    // ログアウトしてログイン画面にリダイレクト
+    Route::get('logout', [Controllers\LoginController::class, 'logout']);
 
 });
+// 未認証の場合にログインフォームにリダイレクト
+// Route::prefix('/')->middleware('auth.general:members')->group(function () {
+Route::prefix('/')->middleware(['auth.general:members', 'verified'])->group(function () {
 
+    // 出勤登録画面の表示
+    Route::get('attendance', [Controllers\DisplayController::class, 'clock']);
 
+    // 勤怠一覧画面(一般ユーザ)の表示
+    Route::get('attendance/list', [Controllers\DisplayController::class, 'list']);
+
+});
 
 // メール認証
 Route::prefix('/email')->group(function () {
@@ -107,7 +75,8 @@ Route::prefix('/email')->group(function () {
         // メール確認の通知
         Route::get('', function () {
             return view('general/auth/verify-email');
-        })->middleware('auth')->name('verification.notice');
+        // })->middleware('auth')->name('verification.notice');
+        })->middleware('auth.general:members')->name('verification.notice');
 
         // メール確認のハンドラ
         Route::get('/{id}/{hash}', function (EmailVerificationRequest $request) {
@@ -115,7 +84,8 @@ Route::prefix('/email')->group(function () {
 
             // メールアドレス検証後のリダイレクト先(出勤登録画面へ)
             return redirect('/attendance');
-        })->middleware(['auth', 'signed'])->name('verification.verify');
+        // })->middleware(['auth', 'signed'])->name('verification.verify');
+        })->middleware(['auth.general:members', 'signed'])->name('verification.verify');
 
     });
 
@@ -124,6 +94,7 @@ Route::prefix('/email')->group(function () {
         $request->user()->sendEmailVerificationNotification();
 
         return back()->with('message', '認証メールを送信しました');
-    })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+    // })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+    })->middleware(['auth.general:members', 'throttle:6,1'])->name('verification.send');
 
 });

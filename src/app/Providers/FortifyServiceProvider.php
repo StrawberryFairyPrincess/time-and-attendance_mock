@@ -12,9 +12,13 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Fortify;
-use Laravel\Fortify\Contracts\LogoutResponse;
-use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
-use App\Http\Responses\RegisterResponse;
+// use Laravel\Fortify\Contracts\LogoutResponse;
+// use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
+// use App\Http\Responses\RegisterResponse;
+use App\Models\Member;
+use App\Actions\Fortify\CreateNewMember;
+use Laravel\Fortify\Contracts\CreatesNewUsers;
+
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -24,14 +28,14 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // ログアウト後の遷移先指定（ログインページ）
-        $this->app->instance(
-            LogoutResponse::class, new class implements LogoutResponse {
-                public function toResponse($request) {
-                    return redirect('/login');
-                }
-            }
-        );
+        // // ログアウト後の遷移先指定（ログインページ）
+        // $this->app->instance(
+        //     LogoutResponse::class, new class implements LogoutResponse {
+        //         public function toResponse($request) {
+        //             return redirect('/login');
+        //         }
+        //     }
+        // );
     }
 
     /**
@@ -39,18 +43,24 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // 新規ユーザの登録処理
-        Fortify::createUsersUsing(CreateNewUser::class);
+        $this->app->singleton(
+            CreatesNewUsers::class,
+            CreateNewMember::class
+        );
 
-        // GETメソッドで/registerにアクセスしたときに表示するviewファイル
-        Fortify::registerView(function () {
-            return view('auth.register');
-        });
+        // // 新規ユーザの登録処理
+        // Fortify::createUsersUsing(CreateNewUser::class);
 
-        // GETメソッドで/loginにアクセスしたときに表示するviewファイル
-        Fortify::loginView(function () {
-            return view('auth.login');
-        });
+        // // GETメソッドで/registerにアクセスしたときに表示するviewファイル
+        // Fortify::registerView(function () {
+        //     // return view('auth.register');
+        //     return view('/general/auth/register');
+        // });
+
+        // // GETメソッドで/loginにアクセスしたときに表示するviewファイル
+        // Fortify::loginView(function () {
+        //     return view('auth.login');
+        // });
 
         // login処理の実行回数を1分あたり10回までに制限
         RateLimiter::for('login', function (Request $request) {
@@ -59,8 +69,8 @@ class FortifyServiceProvider extends ServiceProvider
             return Limit::perMinute(10)->by($email . $request->ip());
         });
 
-        // 新規会員登録後の遷移先を指定
-        $this->app->singleton(RegisterResponseContract::class, RegisterResponse::class);
+        // // 新規会員登録後の遷移先を指定
+        // $this->app->singleton(RegisterResponseContract::class, RegisterResponse::class);
 
         // Fortify::updateUserProfileInformationUsing(UpdateUserProfileInformation::class);
         // Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);

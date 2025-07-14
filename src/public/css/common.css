@@ -21,27 +21,8 @@ header {
     height: 80px;
 }
 
-.logo-link {
-    width: 30%;
-    z-index: 1;
-}
-
-.logo-link img {
-    padding-left: 30px;
-    width: 100%;
-}
-
-.header__logo {
-    color: #fff;
-    text-decoration: none;
-    font-weight: bold;
-    font-size: 24px;
-}
-
-.header-utilities {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+.logo img{
+    padding-left: 20px;
 }
 
 nav {
@@ -58,36 +39,6 @@ nav {
 
 .header-nav__item {
     display: inline-block;
-}
-
-.search {
-    position: absolute;
-    top: 50%;
-    transform: translate(0%, -50%);
-    width: 100%;
-}
-
-.search-form {
-    max-width: 500px;
-    width: 35%;
-    margin: 0 auto;
-}
-
-.search-form__item-input {
-    font-size: 24px;
-    font-family: "Inter", sans-serif;
-    font-weight: 400;
-    color: black;
-    border: none;
-    height: 50px;
-    width: 100%;
-    padding-left: 10px;
-    border-radius: 5px;
-}
-
-.search-form__item-input::placeholder {
-    color: black;
-    opacity: 1;
 }
 
 .header-nav__button button {

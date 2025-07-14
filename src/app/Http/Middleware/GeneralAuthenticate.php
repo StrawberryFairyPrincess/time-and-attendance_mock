@@ -15,8 +15,7 @@ class GeneralAuthenticate extends Middleware
     protected function redirectTo($request)
     {
         if (! $request->expectsJson()) {
-            // return route('login');
-            return view('/general/auth/login');
+            return route('login');
         }
     }
 }

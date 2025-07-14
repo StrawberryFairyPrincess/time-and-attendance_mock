@@ -15,6 +15,9 @@
     <form class="form" action="/login" method="post">
         @csrf
 
+        {{-- LoginRequestの識別用 --}}
+        <input type="hidden" name="user_type" value="general">
+
         <div class="form__group">
             <div class="form__group-title">
                 <span class="form__label--item">メールアドレス</span>
