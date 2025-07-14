@@ -40,16 +40,8 @@ class CreateNewMember implements CreatesNewUsers
         ]);
 
         // 会員登録時の自動ログイン
-        Auth::login($member);
+        Auth::guard('members')->login( $member );
 
         return $member;
     }
-
-    // public function registered($request, $member)
-    // {
-        
-
-    //     // 新規会員登録時のリダイレクト先
-    //     return redirect('/attendance');
-    // }
 }

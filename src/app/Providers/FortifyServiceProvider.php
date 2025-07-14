@@ -28,14 +28,6 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // // ログアウト後の遷移先指定（ログインページ）
-        // $this->app->instance(
-        //     LogoutResponse::class, new class implements LogoutResponse {
-        //         public function toResponse($request) {
-        //             return redirect('/login');
-        //         }
-        //     }
-        // );
     }
 
     /**
@@ -48,42 +40,11 @@ class FortifyServiceProvider extends ServiceProvider
             CreateNewMember::class
         );
 
-        // // 新規ユーザの登録処理
-        // Fortify::createUsersUsing(CreateNewUser::class);
-
-        // // GETメソッドで/registerにアクセスしたときに表示するviewファイル
-        // Fortify::registerView(function () {
-        //     // return view('auth.register');
-        //     return view('/general/auth/register');
-        // });
-
-        // // GETメソッドで/loginにアクセスしたときに表示するviewファイル
-        // Fortify::loginView(function () {
-        //     return view('auth.login');
-        // });
-
         // login処理の実行回数を1分あたり10回までに制限
         RateLimiter::for('login', function (Request $request) {
             $email = (string) $request->email;
 
             return Limit::perMinute(10)->by($email . $request->ip());
         });
-
-        // // 新規会員登録後の遷移先を指定
-        // $this->app->singleton(RegisterResponseContract::class, RegisterResponse::class);
-
-        // Fortify::updateUserProfileInformationUsing(UpdateUserProfileInformation::class);
-        // Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);
-        // Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
-
-        // RateLimiter::for('login', function (Request $request) {
-        //     $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
-
-        //     return Limit::perMinute(5)->by($throttleKey);
-        // });
-
-        // RateLimiter::for('two-factor', function (Request $request) {
-        //     return Limit::perMinute(5)->by($request->session()->get('login.id'));
-        // });
     }
 }
