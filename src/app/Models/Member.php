@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Auth\Events\Registered;
+use App\Models\Clock;
 
 
 // class User extends Authenticatable
@@ -44,4 +45,9 @@ class Member extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    // clocksテーブルとのリレーション定義(1対多)
+    public function clocks() {
+        return $this->hasMany(Clock::class);
+    }
 }

@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use App\Models\Member;
+
+class Clock extends Model
+{
+    use HasFactory;
+
+    // Clocksテーブルのカラムのうち操作可能にするもの
+    protected $fillable = [
+        'member_id',
+
+        'clock',
+        'status'
+    ];
+
+    // // membersテーブルとのリレーション定義(多対1)
+    // public function member()
+    // {
+    //     return $this->belongsTo(Member::class);
+    // }
+}

@@ -29,7 +29,7 @@ nav {
     position: absolute;
     top: 50%;
     right: 25px;
-    transform: translate(0%, -50%);
+    transform: translate(0px, -50%);
 }
 
 .header-nav {
@@ -46,6 +46,7 @@ nav {
     height: 50px;
     font-family: "Inter", sans-serif;
     font-size: 1.7vw;
+    font-weight: 700;
     cursor: pointer;
 
     max-width: 150px;

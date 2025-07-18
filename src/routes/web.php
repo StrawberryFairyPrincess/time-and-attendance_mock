@@ -11,6 +11,7 @@ use App\Http\Controllers\GeneralController;
 
 // 管理者
 use App\Http\Controllers\Admin;
+// 認証不要
 Route::prefix('/admin')->group(function () {
 
     Route::prefix('/login')->group(function () {
@@ -27,7 +28,7 @@ Route::prefix('/admin')->group(function () {
     Route::get('/logout', [Admin\LoginController::class, 'logout']);
 
 });
-// 未認証の場合にログインフォームにリダイレクト
+// 認証必要：未認証の場合にログインフォームにリダイレクト
 Route::prefix('/admin')->middleware('auth:administrators')->group(function () {
 
     // 勤怠一覧画面(管理者)の表示
@@ -35,14 +36,16 @@ Route::prefix('/admin')->middleware('auth:administrators')->group(function () {
 
 });
 
+
 // 一般ユーザ
 use App\Http\Controllers;
-Route::prefix('/')->group(function () {
+// 認証不要
+Route::prefix('')->group(function () {
 
     // ユーザ登録画面の表示
-    Route::get('register', [Controllers\LoginController::class, 'register']);
+    Route::get('/register', [Controllers\LoginController::class, 'register']);
 
-    Route::prefix('login')->group(function () {
+    Route::prefix('/login')->group(function () {
 
         // ログイン画面の表示
         Route::get('', [Controllers\LoginController::class, 'index'])->name('login');
@@ -52,20 +55,27 @@ Route::prefix('/')->group(function () {
     });
 
     // ログアウトしてログイン画面にリダイレクト
-    Route::get('logout', [Controllers\LoginController::class, 'logout']);
+    Route::get('/logout', [Controllers\LoginController::class, 'logout']);
 
 });
-// 未認証の場合にログインフォームにリダイレクト
-// Route::prefix('/')->middleware('auth.general:members')->group(function () {
-Route::prefix('/')->middleware(['auth.general:members', 'verified'])->group(function () {
+// 認証必要：未認証の場合にログインフォームにリダイレクト
+Route::prefix('')->middleware(['auth.general:members', 'verified'])->group(function () {
 
-    // 出勤登録画面の表示
-    Route::get('attendance', [Controllers\DisplayController::class, 'clock']);
+    Route::prefix('/attendance')->group(function () {
 
-    // 勤怠一覧画面(一般ユーザ)の表示
-    Route::get('attendance/list', [Controllers\DisplayController::class, 'list']);
+        // 勤怠登録画面の表示
+        Route::get('', [Controllers\DisplayController::class, 'clock']);
+        // 勤怠登録
+        Route::post('', [Controllers\ProcessController::class, 'clock']);
+
+
+        // 勤怠一覧画面(一般ユーザ)の表示
+        Route::get('/list', [Controllers\DisplayController::class, 'list']);
+
+    });
 
 });
+
 
 // メール認証
 Route::prefix('/email')->group(function () {

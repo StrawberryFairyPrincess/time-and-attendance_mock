@@ -27,12 +27,13 @@ class LoginController extends Controller
         if (Auth::guard('members')->attempt($credentials)) {
             // ログインしたら出勤登録画面にリダイレクト
             return redirect('/attendance')->with([
-                'login_msg' => 'ログインしました。', // ビューの{{ $message }}に展開
+                'login_msg' => 'ログインしました', // ビューの{{ $message }}に展開
             ]);
         }
 
         return back()->withErrors([
-            'login' => ['ログインに失敗しました'], // ビューの{{ $error }}に展開
+            // 'login' => ['ログインに失敗しました'], // ビューの{{ $error }}に展開
+            'password' => 'ログインに失敗しました',
         ]);
     }
 

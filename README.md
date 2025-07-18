@@ -37,9 +37,18 @@ Laravel環境構築
 		```
 
 
-PHPUnit環境構築
+Mailhogの設定
 
-	<!-- ・1会員登録機能の会員登録画面はメール認証を行っており、認証後はFigmaで指定のプロフィール画面に遷移 -->
+	.envの修正
+		``` text
+		MAIL_HOST=mail
+		MAIL_PORT=1025
+		MAIL_FROM_ADDRESS=info@time&attendance.com
+		MAIL_FROM_NAME=退勤管理模擬案件
+		```
+
+
+PHPUnit環境構築
 
 	1. MySQLにログイン
 		``` bash
@@ -95,7 +104,6 @@ PHPUnit環境構築
 	・MySQL 8.0.26
 	・nginx 1.21.1
 	・Fortify 1.19
-	<!-- ・Stripe 17.3 -->
 	・PHPUnit 9.5.10
 
 
@@ -108,3 +116,13 @@ PHPUnit環境構築
 
     ・開発環境：http://localhost/
     ・phpMyAdmin：http://localhost:8080/
+
+
+## ログインは必要に応じて以下使用
+
+	・管理者
+		ユーザID: admin001@example.com
+		パスワード: pass0001
+	・一般ユーザ
+		ユーザID: member001@example.com
+		パスワード: pass0001

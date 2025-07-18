@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 
@@ -23,7 +24,7 @@ class LoginRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(Request $request)
     {
         // 管理者ログインからのバリデーションはadministratorsテーブルを確認
         if ( request('user_type') == 'admin' ) {
@@ -31,12 +32,12 @@ class LoginRequest extends FormRequest
                 'email' => [
                     'required',
                     'email',
-                    Rule::exists('administrators'),
+                    // 入力された値がadministratorsテーブルのemailカラムに存在するか
+                    Rule::exists('administrators', 'email'),
                 ],
                 'password' => [
                     'required',
                     'min:8',
-                    Rule::exists('administrators'),
                 ],
             ];
         }
@@ -46,12 +47,12 @@ class LoginRequest extends FormRequest
                 'email' => [
                     'required',
                     'email',
-                    Rule::exists('members'),
+                    // 入力された値がmembersテーブルのemailカラムに存在するか
+                    Rule::exists('members', 'email'),
                 ],
                 'password' => [
                     'required',
                     'min:8',
-                    Rule::exists('members'),
                 ],
             ];
         }
@@ -67,7 +68,6 @@ class LoginRequest extends FormRequest
             'email.exists' => 'ログイン情報が登録されていません',
             'password.required' => 'パスワードを入力してください',
             'password.min' => 'パスワードは8文字以上で入力してください',
-            'password.exists' => 'ログイン情報が登録されていません',
         ];
     }
 }
