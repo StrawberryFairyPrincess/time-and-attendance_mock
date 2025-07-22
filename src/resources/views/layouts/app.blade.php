@@ -32,7 +32,7 @@
                         <li class="header-nav__item">
                             <form class="header-nav__button" action="/admin/attendances" method="GET">
                                 @csrf
-                                <button type="submit">退勤一覧</button>
+                                <button type="submit">勤怠一覧</button>
                             </form>
                         </li>
                         <li class="header-nav__item">
@@ -65,13 +65,13 @@
                             <li class="header-nav__item">
                             <form class="header-nav__button" action="/attendance" method="GET">
                                 @csrf
-                                <button type="submit">退勤</button>
+                                <button type="submit">勤怠</button>
                             </form>
                             </li>
                             <li class="header-nav__item">
                                 <form class="header-nav__button" action="/attendance/list" method="GET">
                                     @csrf
-                                    <button type="submit">退勤一覧</button>
+                                    <button type="submit">勤怠一覧</button>
                                 </form>
                             </li>
                             <li class="header-nav__item">

@@ -51,7 +51,6 @@ Route::prefix('')->group(function () {
         Route::get('', [Controllers\LoginController::class, 'index'])->name('login');
         // ログインする
         Route::post('', [Controllers\LoginController::class, 'login']);
-
     });
 
     // ログアウトしてログイン画面にリダイレクト
@@ -69,8 +68,19 @@ Route::prefix('')->middleware(['auth.general:members', 'verified'])->group(funct
         Route::post('', [Controllers\ProcessController::class, 'clock']);
 
 
-        // 勤怠一覧画面(一般ユーザ)の表示
-        Route::get('/list', [Controllers\DisplayController::class, 'list']);
+        Route::prefix('/list')->group(function () {
+
+            // 勤怠一覧画面(一般ユーザ)の表示
+            Route::get('', [Controllers\DisplayController::class, 'list']);
+            // 月めくり
+            Route::post('', [Controllers\ProcessController::class, 'page']);
+        });
+
+        Route::prefix('/detail/{date}')->group(function () {
+
+            // 勤怠詳細画面の表示
+            Route::get('', [Controllers\DisplayController::class, 'detail']);
+        });
 
     });
 

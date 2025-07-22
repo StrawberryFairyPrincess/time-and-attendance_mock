@@ -18,6 +18,11 @@ class Clock extends Model
         'status'
     ];
 
+    // PHPで文字列として扱われないようにする
+    protected $casts = [
+        'clock' => 'datetime',
+    ];
+
     // // membersテーブルとのリレーション定義(多対1)
     // public function member()
     // {

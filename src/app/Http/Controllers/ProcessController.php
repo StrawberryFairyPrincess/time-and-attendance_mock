@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\CarbonImmutable;
 use App\Models\Clock;
+use App\Http\Controllers\DisplayController;
 
 
 class ProcessController extends Controller
@@ -15,7 +16,7 @@ class ProcessController extends Controller
 
         $clock = [
             'member_id' => Auth::id(),
-            'clock' => CarbonImmutable::now(),
+            'clock' => CarbonImmutable::now(), //ボタンを押したときの時間
             'status' => null
         ];
 
@@ -41,5 +42,28 @@ class ProcessController extends Controller
         return redirect('/attendance');
     }
 
-    
+    // 勤怠一覧画面の月めくり
+    public function page( Request $request )
+    {
+        // 勤怠一覧画面を最初に開いたときの日時
+        $monthly = CarbonImmutable::parse($request['monthly']);
+
+        // 前月が押されたとき
+        if ($request->has('sub')) {
+            return redirect('/attendance/list')
+                ->with([ //セッションで値を渡す
+                    'monthly' => $monthly,
+                    'sub' => $monthly->subMonth()
+                ]);
+        }
+        // 翌月が押されたとき
+        elseif ($request->has('add')) {
+            return redirect('/attendance/list')
+                ->with([ //セッションで値を渡す
+                    'monthly' => $monthly,
+                    'add' => $monthly->addMonth()
+                ]);
+        }
+    }
+
 }
