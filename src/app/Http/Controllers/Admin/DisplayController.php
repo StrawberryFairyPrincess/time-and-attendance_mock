@@ -1,5 +1,7 @@
 <?php
 
+// 管理者の表示用(get処理)
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;

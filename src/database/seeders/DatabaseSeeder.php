@@ -13,11 +13,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // \App\Models\User::factory(10)->create();
-
+        // ユーザのシーディング(10人ずつ)
         $this->call([
+            // 管理者
             AdministratorSeeder::class,
+            // 一般ユーザ
             MemberSeeder::class,
         ]);
+
+        // Clocksテーブルへのシーディング処理
+        $this->call(ClockTableSeeder::class);
+
+        // Correctionsテーブルへのシーディング処理
+        $this->call(CorrectionTableSeeder::class);
     }
 }

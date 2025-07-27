@@ -1,5 +1,7 @@
 <?php
 
+// 一般ユーザの表示用(get処理)
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -18,14 +20,14 @@ class DisplayController extends Controller
         $date = CarbonImmutable::now();
 
         // データベースにログインユーザのデータがあるとき
-        if( Clock::where( 'id', Auth::id() )->exists() ){
+        if( Clock::where( 'member_id', Auth::id() )->exists() ){
             // 最後の登録が「出勤」か「休憩戻」だったときのステータス
-            if( Auth::user()->clocks()->latest()->first()->status == '出勤' ||
-                Auth::user()->clocks()->latest()->first()->status == '休憩戻' ){
+            if( Auth::user()->clocks()->latest()->first()['status'] == '出勤' ||
+                Auth::user()->clocks()->latest()->first()['status'] == '休憩戻' ){
                 $status = '出勤中';
             }
             // 最後の登録が「退勤」だったときのステータス
-            elseif( Auth::user()->clocks()->latest()->first()->status == '退勤' ){
+            elseif( Auth::user()->clocks()->latest()->first()['status'] == '退勤' ){
                 //最後の「退勤」の打刻が当日
                 if( $date->isSameDay( Auth::user()->clocks()->latest()->first()->clock ) ){
                     // 同日に「出勤」の打刻があるとき
@@ -44,7 +46,7 @@ class DisplayController extends Controller
                 }
             }
             // 最後の登録が「休憩入」だったときのステータス
-            elseif( Auth::user()->clocks()->latest()->first()->status == '休憩入' ){
+            elseif( Auth::user()->clocks()->latest()->first()['status'] == '休憩入' ){
                 $status = '休憩中';
             }
         }

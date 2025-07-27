@@ -1,5 +1,7 @@
 <?php
 
+// 一般ユーザのpost処理用
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
