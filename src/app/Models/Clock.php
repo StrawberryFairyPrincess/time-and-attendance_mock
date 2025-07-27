@@ -18,7 +18,7 @@ class Clock extends Model
         'status'
     ];
 
-    // PHPで文字列として扱われないようにする
+    // PHPで文字列として扱われないようにする(日時として扱う)
     protected $casts = [
         'clock' => 'datetime',
     ];

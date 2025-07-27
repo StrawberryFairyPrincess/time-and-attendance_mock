@@ -11,20 +11,20 @@ main{
 
 .title{
     margin-top: 50px;
-    position: relative;/* ::before要素を配置するために必要 */
+    position: relative; /* ::before要素を配置するために必要 */
     padding-left: 20px;
     margin-bottom: 30px;
     font-size: 2.1vw;
     font-weight: 700;
 }
 .title::before {
-    content: "";/* ::before要素は内容がないと表示されない */
-    position: absolute;/* 親要素からの相対位置で配置 */
-    left: 0;/* 左端に配置 */
-    top: 0;/* 上端に配置 */
-    height: 100%;/* 親要素の高さに合わせる */
-    width: 5px;/* 縦線の幅 */
-    background-color: black;/* 縦線の色 */
+    content: ""; /* ::before要素は内容がないと表示されない */
+    position: absolute; /* 親要素からの相対位置で配置 */
+    left: 0; /* 左端に配置 */
+    top: 0; /* 上端に配置 */
+    height: 100%; /* 親要素の高さに合わせる */
+    width: 5px;
+    background-color: black;
 }
 
 .list{

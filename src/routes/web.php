@@ -67,7 +67,6 @@ Route::prefix('')->middleware(['auth.general:members', 'verified'])->group(funct
         // 勤怠登録
         Route::post('', [Controllers\ProcessController::class, 'clock']);
 
-
         Route::prefix('/list')->group(function () {
 
             // 勤怠一覧画面(一般ユーザ)の表示
@@ -80,6 +79,8 @@ Route::prefix('')->middleware(['auth.general:members', 'verified'])->group(funct
 
             // 勤怠詳細画面の表示
             Route::get('', [Controllers\DisplayController::class, 'detail']);
+            // 修正依頼
+            Route::post('', [Controllers\ProcessController::class, 'correct']);
         });
 
     });

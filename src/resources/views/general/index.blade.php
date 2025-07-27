@@ -75,13 +75,28 @@
 
                     {{-- 出勤 --}}
                     <td>
-                        {{ $table[$date->isoFormat('YYYY/MM/DD')]['clockin']->format('H:i') }}
+                        @if( $table[$date->isoFormat('YYYY/MM/DD')]['clockin'] != null )
+                            {{ $table[$date->isoFormat('YYYY/MM/DD')]['clockin']->format('H:i') }}
+                        @endif
                     </td>
 
                     {{-- 退勤 --}}
                     <td>
+                        {{-- 退勤のデータがあるとき --}}
                         @if( $table[$date->isoFormat('YYYY/MM/DD')]['clockout'] != null )
-                            {{ $table[$date->isoFormat('YYYY/MM/DD')]['clockout']->format('H:i') }}
+                            {{-- 出勤した日と同じとき --}}
+                            @if( $table[$date->isoFormat('YYYY/MM/DD')]['clockout']
+                                ->isSameDay( $table[$date->isoFormat('YYYY/MM/DD')]['clockin'] ) )
+                                {{ $table[$date->isoFormat('YYYY/MM/DD')]['clockout']->format('H:i') }}
+                            {{-- 出勤した日と異なるとき(翌日に退勤) --}}
+                            @else
+                                <?php
+                                    $d = $table[$date->isoFormat('YYYY/MM/DD')]['clockout']->format('Hi');
+                                    $h = (int)str_split( $d, 2 )[0] + 24;
+                                    $m = (int)str_split( $d, 2 )[1];
+                                ?>
+                                {{ $h }}:{{ sprintf("%02d", $m) }}
+                            @endif
                         @endif
                     </td>
 
@@ -99,11 +114,13 @@
                         @endif
                     </td>
 
-                    {{-- 詳細 --}}
+                    {{-- 詳細(出勤の打刻がある日だけ) --}}
                     <td>
-                        <a href="{{ '/attendance/detail/' . $date->isoFormat('YYYYMMDD') }}">
-                            詳細
-                        </a>
+                        @if( $table[$date->isoFormat('YYYY/MM/DD')]['clockin'] != null )
+                            <a href="{{ '/attendance/detail/' . $date->isoFormat('YYYYMMDD') }}">
+                                詳細
+                            </a>
+                        @endif
                     </td>
 
                     @endif

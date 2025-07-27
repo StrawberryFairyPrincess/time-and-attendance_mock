@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Auth\Events\Registered;
 use App\Models\Clock;
+use App\Models\Correction;
 
 
 // class User extends Authenticatable
@@ -49,5 +50,10 @@ class Member extends Authenticatable implements MustVerifyEmail
     // clocksテーブルとのリレーション定義(1対多)
     public function clocks() {
         return $this->hasMany(Clock::class);
+    }
+
+    // correctionsテーブルとのリレーション定義(1対多)
+    public function corrections() {
+        return $this->hasMany(Correction::class);
     }
 }

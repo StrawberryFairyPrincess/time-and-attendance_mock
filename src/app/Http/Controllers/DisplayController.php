@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\CarbonImmutable;
 use App\Models\Clock;
+use App\Models\Correction;
 
 
 class DisplayController extends Controller
@@ -17,7 +18,7 @@ class DisplayController extends Controller
         $date = CarbonImmutable::now();
 
         // データベースにログインユーザのデータがあるとき
-        if( Clock::where('id', Auth::id())->exists() ){
+        if( Clock::where( 'id', Auth::id() )->exists() ){
             // 最後の登録が「出勤」か「休憩戻」だったときのステータス
             if( Auth::user()->clocks()->latest()->first()->status == '出勤' ||
                 Auth::user()->clocks()->latest()->first()->status == '休憩戻' ){
@@ -25,9 +26,17 @@ class DisplayController extends Controller
             }
             // 最後の登録が「退勤」だったときのステータス
             elseif( Auth::user()->clocks()->latest()->first()->status == '退勤' ){
-                //最後の登録が当日
+                //最後の「退勤」の打刻が当日
                 if( $date->isSameDay( Auth::user()->clocks()->latest()->first()->clock ) ){
-                    $status = '退勤済';
+                    // 同日に「出勤」の打刻があるとき
+                    if( Clock::whereDate( 'clock', $date )->where( 'status', '出勤' )->first()
+                        != NULL ){
+                        $status = '退勤済';
+                    }
+                    // 同日に「出勤」の打刻がないとき（前日の打刻）
+                    else{
+                        $status = '勤務外';
+                    }
                 }
                 //最後の登録が前日以前
                 else{
@@ -64,14 +73,17 @@ class DisplayController extends Controller
         }
 
         // 自分の打刻情報を全て取得
-        $clocks = Clock::where('member_id', Auth::id())->get();
+        $clocks = Clock::where( 'member_id', Auth::id() )->get();
 
         $table = [];
         $previous = null;
         foreach( $clocks as $clock ){
-            // 前のデータがないか、前のデータが違う日付のとき
+            // 前のデータがないか、前のデータが違う日付のときか、その日の出勤statusが存在しないとき
             if( $previous == null ||
-                !$clock['clock']->isSameDay( $previous['clock'] ) ){
+                !$clock['clock']->isSameDay( $previous['clock'] ) ||
+                Clock::where( 'member_id', Auth::id() )
+                    ->whereDate( 'clock', $clock['clock'] )
+                    ->where( 'status', '出勤' )->get()->isEmpty() ){
 
                 $table[ $clock['clock']->isoFormat('YYYY/MM/DD') ] = [
                     'clockin' => null,
@@ -81,23 +93,43 @@ class DisplayController extends Controller
                 ];
             }
 
-            // &をつければ元の配列も編集される↓↓↓
-            // $date: $tableのキー(日付)、$rowは配列の中身4項目
+            // &をつければ元の配列$tableも編集される
+            // $date: $tableのキー(日付)
+            // $row: 分解した1個の['clockin', 'clockout', 'break', 'sum']
             foreach( $table as $date => &$row ){
+                // $clockの日付と$rowの$dateが同じときだけデータを入れる
                 if( $date == $clock['clock']->isoFormat('YYYY/MM/DD') ){
+                    // $clockが出勤の打刻のとき
                     if( $clock['status'] == '出勤' ){
                         $row['clockin'] = $clock['clock'];
                     }
+                    // $clockが退勤の打刻のとき
                     elseif( $clock['status'] == '退勤' ){
-                        $row['clockout'] = $clock['clock'];
-                        $row['sum'] = $row['clockin']->diffInSeconds( $row['clockout'] );
+                        // 同日に出勤の打刻があるとき
+                        if( $row['clockin'] != null ){
+                            $row['clockout'] = $clock['clock'];
+                            $row['sum'] = $row['clockin']->diffInSeconds( $row['clockout'] )
+                                - $row['break'];
+                        }
+                        // 退勤の打刻が日付をまたぐとき、前日(出勤の打刻した日)のデータに入れる
+                        else{
+                            $table[ $clock['clock']->subDay()->isoFormat('YYYY/MM/DD') ]['clockout']
+                                = $clock['clock'];
+                            $table[ $clock['clock']->subDay()->isoFormat('YYYY/MM/DD') ]['sum']
+                                = $table[ $clock['clock']->subDay()->isoFormat('YYYY/MM/DD') ]['clockin']
+                                ->diffInSeconds( $table[ $clock['clock']->subDay()->isoFormat('YYYY/MM/DD') ]['clockout'] )
+                                - $table[ $clock['clock']->subDay()->isoFormat('YYYY/MM/DD') ]['break'];
+                        }
                     }
+                    // $clockが休憩入の打刻のとき
                     elseif( $clock['status'] == '休憩入' ){
                         $break = $clock['clock'];
                     }
+                    // $clockが休憩戻の打刻のとき
                     elseif( $clock['status'] == '休憩戻' ){
                         $row['break'] += $break->diffInSeconds( $clock['clock'] );
                     }
+
                     break;
                 }
             }
@@ -109,16 +141,23 @@ class DisplayController extends Controller
     }
 
     // 勤怠詳細画面の表示
-    public function detail()
+    public function detail( $date )
     {
+        // クエリパラメータから日付を取得
+        $year = (int)str_split( $date, 4 )[0];
+        $month = (int)str_split( str_split($date, 4)[1], 2 )[0];
+        $day = (int)str_split( str_split($date, 4)[1], 2 )[1];
+        $date = CarbonImmutable::parse( $year . '-' . $month . '-' . $day );
 
+        // その日と次の日の打刻を取得
+        $clocks = Clock::where( 'member_id', Auth::id() )->whereDate( 'clock', $date )->get();
+        $tomorrows = Clock::where( 'member_id', Auth::id() )->whereDate( 'clock', $date->addDay() )->get();
 
+        // その日の修正申請を取得
+        $correction =
+            Correction::where( 'member_id', Auth::id() )->whereDate( 'date', $date )
+                ->latest()->first();
 
-
-
-
-
-
-        return view( '/general/detail' );
+        return view( '/general/detail', compact( 'date', 'clocks', 'tomorrows', 'correction' ) );
     }
 }
