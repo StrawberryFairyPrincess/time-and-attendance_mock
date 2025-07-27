@@ -76,15 +76,6 @@ class ProcessController extends Controller
         $day = (int)str_split( str_split($request->date, 4)[1], 2 )[1];
         $date = CarbonImmutable::parse( $year . '-' . $month . '-' . $day );
 
-
-
-//////////////////////////// 入力が00:00の時の考慮( NULL扱いしたい　
-//               休憩の時は最後が00:00はデータそのものがないことにする )/////////////////////////////
-// dd($request->validated());
-
-        // $keys = array_keys($request->validated());
-// dd(array_key_last($request->validated()));
-
         // takeとbackの最後の要素を見るために抽出
         $takekeys = [];
         $backkeys = [];

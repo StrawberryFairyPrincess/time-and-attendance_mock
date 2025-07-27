@@ -5,9 +5,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\GeneralController;
-
 
 // 管理者
 use App\Http\Controllers\Admin;
@@ -36,7 +33,6 @@ Route::prefix('/admin')->middleware('auth:administrators')->group(function () {
 
 });
 
-
 // 一般ユーザ
 use App\Http\Controllers;
 // 認証不要
@@ -55,7 +51,6 @@ Route::prefix('')->group(function () {
 
     // ログアウトしてログイン画面にリダイレクト
     Route::get('/logout', [Controllers\LoginController::class, 'logout']);
-
 });
 // 認証必要：未認証の場合にログインフォームにリダイレクト
 Route::prefix('')->middleware(['auth.general:members', 'verified'])->group(function () {
@@ -82,11 +77,11 @@ Route::prefix('')->middleware(['auth.general:members', 'verified'])->group(funct
             // 修正依頼
             Route::post('', [Controllers\ProcessController::class, 'correct']);
         });
-
     });
 
+    // 申請一覧画面の表示
+    Route::get('/stamp_correction_request/list', [Controllers\DisplayController::class, 'request']);
 });
-
 
 // メール認証
 Route::prefix('/email')->group(function () {

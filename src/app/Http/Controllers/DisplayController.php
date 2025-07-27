@@ -160,4 +160,21 @@ class DisplayController extends Controller
 
         return view( '/general/detail', compact( 'date', 'clocks', 'tomorrows', 'correction' ) );
     }
+
+    // 申請一覧画面の表示
+    public function request( Request $request ){
+
+        // ?tab=doneだったとき
+        if( $request->tab == 'done' ){
+            $corrections =
+                Correction::where( 'member_id', Auth::id() )->where( 'approve', '済' )->get();
+        }
+        // ?tab=yetかtabなしで表示したとき
+        else{
+            $corrections =
+                Correction::where( 'member_id', Auth::id() )->where( 'approve', '未' )->get();
+        }
+
+        return view( '/general/request', compact( 'corrections' ) );
+    }
 }

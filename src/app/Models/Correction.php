@@ -22,6 +22,7 @@ class Correction extends Model
     ];
 
     protected $casts = [
+        'date' => 'datetime',
         'clockin' => 'datetime',
         'clockout' => 'datetime',
         'breaks' => 'array'
