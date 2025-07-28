@@ -70,22 +70,26 @@
 
                     {{-- 出勤 --}}
                     <td>
-                        {{ $row['clockin']->format('H:i') }}
+                        @if( isset($row['clockin']) )
+                            {{ $row['clockin']->format('H:i') }}
+                        @endif
                     </td>
 
                     {{-- 退勤 --}}
                     <td>
-                        {{-- 出勤した日と同じとき --}}
-                        @if( $row['clockout']->isSameDay( $row['clockin'] ) )
-                            {{ $row['clockout']->format('H:i') }}
-                        {{-- 出勤した日と異なるとき(翌日に退勤) --}}
-                        @else
-                            <?php
-                                $d = $row['clockout']->format('Hi');
-                                $h = (int)str_split( $d, 2 )[0] + 24;
-                                $m = (int)str_split( $d, 2 )[1];
-                            ?>
-                            {{ $h }}:{{ sprintf("%02d", $m) }}
+                        @if( isset($row['clockout']) )
+                            {{-- 出勤した日と同じとき --}}
+                            @if( $row['clockout']->isSameDay( $row['clockin'] ) )
+                                {{ $row['clockout']->format('H:i') }}
+                            {{-- 出勤した日と異なるとき(翌日に退勤) --}}
+                            @else
+                                <?php
+                                    $d = $row['clockout']->format('Hi');
+                                    $h = (int)str_split( $d, 2 )[0] + 24;
+                                    $m = (int)str_split( $d, 2 )[1];
+                                ?>
+                                {{ $h }}:{{ sprintf("%02d", $m) }}
+                            @endif
                         @endif
                     </td>
 
@@ -103,7 +107,7 @@
                         @endif
                     </td>
 
-                    {{-- 詳細(出勤の打刻がある日だけ) --}}
+                    {{-- 詳細 --}}
                     <td>
                         <a href="{{ '/admin/attendances/' . $id . '/' . $today->isoFormat('YYYYMMDD') }}">
                             詳細

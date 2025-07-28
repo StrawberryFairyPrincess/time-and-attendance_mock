@@ -20,7 +20,6 @@ Route::prefix('/admin')->group(function () {
 
     });
 
-
     // ログアウトしてログイン画面にリダイレクト
     Route::get('/logout', [Admin\LoginController::class, 'logout']);
 
@@ -28,12 +27,25 @@ Route::prefix('/admin')->group(function () {
 // 認証必要：未認証の場合にログインフォームにリダイレクト
 Route::prefix('/admin')->middleware('auth:administrators')->group(function () {
 
-    Route::prefix('/attendances')->middleware('auth:administrators')->group(function () {
+    Route::prefix('/attendances')->group(function () {
 
         // 勤怠一覧画面(管理者)の表示
         Route::get('',[Admin\DisplayController::class, 'index']);
         // 日めくり
         Route::post('',[Admin\ProcessController::class, 'page']);
+
+        // 勤怠詳細画面の表示
+        Route::get('/{id}/{date}',[Admin\DisplayController::class, 'detail']);
+
+    });
+
+    Route::prefix('/requests')->group(function () {
+
+        // 申請一覧画面の表示
+        Route::get('',[Admin\DisplayController::class, 'request']);
+
+        // 修正申請承認画面の表示
+        Route::get('/{id}/{date}',[Admin\DisplayController::class, 'approve']);
     });
 
 });
@@ -56,6 +68,7 @@ Route::prefix('')->group(function () {
 
     // ログアウトしてログイン画面にリダイレクト
     Route::get('/logout', [Controllers\LoginController::class, 'logout']);
+
 });
 // 認証必要：未認証の場合にログインフォームにリダイレクト
 Route::prefix('')->middleware(['auth.general:members', 'verified'])->group(function () {
@@ -86,6 +99,7 @@ Route::prefix('')->middleware(['auth.general:members', 'verified'])->group(funct
 
     // 申請一覧画面の表示
     Route::get('/stamp_correction_request/list', [Controllers\DisplayController::class, 'request']);
+
 });
 
 // メール認証

@@ -139,4 +139,85 @@ class DisplayController extends Controller
 
         return view( 'admin/index', compact( 'today', 'table' ) );
     }
+
+    // 勤怠詳細画面の表示
+    public function detail( Request $request )
+    {
+        // クエリパラメータから一般ユーザIDを取得
+        $member = Member::where( 'id', $request->id )->first();
+
+        // クエリパラメータから日付を取得
+        $year = (int)str_split( $request->date, 4 )[0];
+        $month = (int)str_split( str_split( $request->date, 4 )[1], 2 )[0];
+        $day = (int)str_split( str_split( $request->date, 4 )[1], 2 )[1];
+        $date = CarbonImmutable::parse( $year . '-' . $month . '-' . $day );
+
+        // その日と次の日の打刻を取得
+        $clocks =
+            Clock::where( 'member_id', $request->id )
+                ->whereDate( 'clock', $date )->get();
+        $tomorrows =
+            Clock::where( 'member_id', $request->id )
+                ->whereDate( 'clock', $date->addDay() )->get();
+
+        // その日の修正申請を取得
+        $correction =
+            Correction::where( 'member_id', $request->id )
+                ->whereDate( 'date', $date )->latest()->first();
+
+        return view( '/admin/detail',
+            compact( 'member', 'date', 'clocks', 'tomorrows', 'correction' ) );
+    }
+
+    // 修正申請承認画面の表示
+    public function approve( Request $request )
+    {
+        // クエリパラメータから一般ユーザIDを取得
+        $member = Member::where( 'id', $request->id )->first();
+
+        // クエリパラメータから日付を取得
+        $year = (int)str_split( $request->date, 4 )[0];
+        $month = (int)str_split( str_split( $request->date, 4 )[1], 2 )[0];
+        $day = (int)str_split( str_split( $request->date, 4 )[1], 2 )[1];
+        $date = CarbonImmutable::parse( $year . '-' . $month . '-' . $day );
+
+        // その日と次の日の打刻を取得
+        $clocks =
+            Clock::where( 'member_id', $request->id )
+                ->whereDate( 'clock', $date )->get();
+        $tomorrows =
+            Clock::where( 'member_id', $request->id )
+                ->whereDate( 'clock', $date->addDay() )->get();
+
+        // その日の修正申請を取得
+        $correction =
+            Correction::where( 'member_id', $request->id )
+                ->whereDate( 'date', $date )->latest()->first();
+
+        return view( '/admin/approve',
+            compact( 'member', 'date', 'clocks', 'tomorrows', 'correction' ) );
+    }
+
+    // 申請一覧画面の表示
+    public function request( Request $request ){
+
+        // ?tab=doneだったとき
+        if( $request->tab == 'done' ){
+            $corrections =
+                Correction::where( 'approve', '済' )->get();
+        }
+        // ?tab=yetかtabなしで表示したとき
+        else{
+            $corrections =
+                Correction::where( 'approve', '未' )->get();
+        }
+
+        return view( '/admin/request', compact( 'corrections' ) );
+    }
+
+
+
+
+
+
 }

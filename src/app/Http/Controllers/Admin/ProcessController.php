@@ -27,7 +27,7 @@ class ProcessController extends Controller
                     'sub' => $daily->subDay()
                 ]);
         }
-        // 翌月が押されたとき
+        // 翌日が押されたとき
         elseif ($request->has('add')) {
             return redirect('/admin/attendances')
                 ->with([ //セッションで値を渡す

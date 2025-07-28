@@ -24,7 +24,7 @@ class CorrectionRequest extends FormRequest
     public function rules()
     {
         $rules = [
-            'clockin' => ['required', 'regex:/^(?:[0-3]?\d|4[0-7]):[0-5]\d$/'],
+            'clockin' => ['required', 'regex:/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/'],
             'clockout' => ['regex:/^(?:[0-3]?\d|4[0-7]):[0-5]\d$/'],
             'remarks' => ['required', 'string', 'max:255'],
         ];
@@ -33,7 +33,7 @@ class CorrectionRequest extends FormRequest
         foreach ($inputs as $key => $value) {
             // 'take'から始まるか、'back'から始まるキーのとき
             if( strpos( $key, 'take' ) === 0 || strpos( $key, 'back' ) === 0 ) {
-                $rules[ $key ] = ['regex:/^(?:[0-3]?\d|4[0-7]):[0-5]\d$/'];
+                $rules[ $key ] = ['regex:/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/'];
             }
         }
 

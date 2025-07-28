@@ -120,8 +120,14 @@ class ProcessController extends Controller
                     if( $h > 24 ){
                         $h -= 24;
 
+                        // 実際の退勤のデータがないとき
+                        if( empty( $request['realout'] ) ){
+                            $clockout =
+                                CarbonImmutable::parse( $year . '-' . $month . '-' . $day .
+                                ' ' . $h . ':' . $m );
+                        }
                         // 実際の打刻も日を跨いでいる
-                        if( (int)explode( ':', $request['realout'] )[0] >= 24 ){
+                        elseif( (int)explode( ':', $request['realout'] )[0] >= 24 ){
                             // 申請された時間が登録されている時間と同じとき
                             if( $value ==
                                 Clock::where( 'member_id', Auth::id() )
@@ -131,8 +137,9 @@ class ProcessController extends Controller
                             }
                             // 申請された時間が登録されている時間から変更されているとき
                             else{
-                                $clockout = CarbonImmutable::parse( $year . '-' . $month . '-' . $day .
-                                            ' ' . $h . ':' . $m );
+                                $clockout =
+                                    CarbonImmutable::parse( $year . '-' . $month . '-' . $day .
+                                    ' ' . $h . ':' . $m );
                             }
                         }
                         // 実際の打刻はその日中
@@ -144,8 +151,14 @@ class ProcessController extends Controller
                     }
                     // その日中の退勤時間を申請するとき
                     else{
+                        // 実際の退勤のデータがないとき
+                        if( empty( $request['realout'] ) ){
+                            $clockout =
+                                CarbonImmutable::parse( $year . '-' . $month . '-' . $day .
+                                ' ' . $h . ':' . $m );
+                        }
                         // 実際の打刻もその日中
-                        if( (int)explode( ':', $request['realout'] )[0] < 24 ){
+                        elseif( (int)explode( ':', $request['realout'] )[0] < 24 ){
                             // 申請された時間が登録されている時間と同じとき
                             if( $value ==
                                 Clock::where( 'member_id', Auth::id() )->whereDate( 'clock', $date )

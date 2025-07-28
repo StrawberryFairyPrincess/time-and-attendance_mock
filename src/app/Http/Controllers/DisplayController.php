@@ -147,8 +147,8 @@ class DisplayController extends Controller
     {
         // クエリパラメータから日付を取得
         $year = (int)str_split( $date, 4 )[0];
-        $month = (int)str_split( str_split($date, 4)[1], 2 )[0];
-        $day = (int)str_split( str_split($date, 4)[1], 2 )[1];
+        $month = (int)str_split( str_split( $date, 4 )[1], 2 )[0];
+        $day = (int)str_split( str_split( $date, 4 )[1], 2 )[1];
         $date = CarbonImmutable::parse( $year . '-' . $month . '-' . $day );
 
         // その日と次の日の打刻を取得

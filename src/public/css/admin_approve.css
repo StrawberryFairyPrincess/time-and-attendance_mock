@@ -1,1 +1,116 @@
+body {
+    background: #F0EFF2;
+}
 
+main {
+    display: flex;
+    justify-content: center;
+}
+
+.flexbox {
+    width: 60%;
+}
+
+.title {
+    margin-top: 50px;
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 30px;
+    font-size: 2.1vw;
+    font-weight: 700;
+}
+
+.title::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    /* 左端に配置 */
+    top: 0;
+    /* 上端に配置 */
+    height: 100%;
+    /* 親要素の高さに合わせる */
+    width: 5px;
+    background-color: black;
+}
+
+.detail {
+    background: white;
+    border-radius: 10px;
+    width: 100%;
+    color: #737373;
+}
+
+table {
+    width: 100%;
+    font-size: 1.1vw;
+    font-weight: 700;
+}
+
+table input {
+    width: 65px;
+    height: 30px;
+    padding: 10px;
+    border-radius: 4px;
+    border: solid 1px #E1E1E1;
+
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+}
+
+table textarea {
+    width: 340px;
+    height: 60px;
+    padding: 10px;
+    border-radius: 4px;
+    border: solid 1px #D9D9D9;
+
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+}
+
+tr:not(:last-child) {
+    border-bottom: 2px solid #E1E1E1;
+}
+
+th {
+    text-align: left;
+    padding: 30px;
+    padding-left: 50px;
+}
+
+td {
+    color: black;
+    padding-left: 80px;
+}
+
+.space {
+    margin: 0px 100px;
+}
+
+.button {
+    margin-top: 30px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.button button {
+    padding: 10px 40px;
+    margin-bottom: 30px;
+    border-radius: 5px;
+    border: none;
+
+    color: white;
+    font-family: inherit;
+    font-size: 1.5vw;
+    font-weight: 700;
+}
+.button .done{
+    background: #696969;
+    cursor: not-allowed;
+}
+.button .yet{
+    background: black;
+    cursor: pointer;
+}

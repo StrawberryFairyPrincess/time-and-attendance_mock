@@ -1,1 +1,99 @@
+body {
+    background: #F0EFF2;
+}
 
+main {
+    display: flex;
+    justify-content: center;
+}
+
+.flexbox {
+    width: 70%;
+}
+
+.title {
+    margin-top: 50px;
+    position: relative;
+    /* ::before要素を配置するために必要 */
+    padding-left: 20px;
+    margin-bottom: 30px;
+    font-size: 2.1vw;
+    font-weight: 700;
+}
+
+.title::before {
+    content: "";
+    /* ::before要素は内容がないと表示されない */
+    position: absolute;
+    /* 親要素からの相対位置で配置 */
+    left: 0;
+    /* 左端に配置 */
+    top: 0;
+    /* 上端に配置 */
+    height: 100%;
+    /* 親要素の高さに合わせる */
+    width: 5px;
+    background-color: black;
+}
+
+.status {
+    width: 100%;
+    color: #737373;
+}
+
+.tab {
+    border-bottom: 1px solid black;
+    margin: 50px 0;
+    padding: 30px 0;
+}
+
+a {
+    text-decoration: none;
+    font-weight: 400;
+    margin: 0 50px;
+}
+
+a,
+a:hover,
+a:visited {
+    color: black;
+}
+
+.checked {
+    font-weight: 700;
+}
+
+.list {
+    background: white;
+    width: 100%;
+    border-radius: 10px;
+}
+
+table {
+    width: 100%;
+    font-size: 1.1vw;
+    font-weight: 700;
+    table-layout: fixed;
+    margin-bottom: 50px;
+}
+
+tr:not(:last-child) {
+    border-bottom: 2px solid #E1E1E1;
+}
+
+th,
+td {
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    border-bottom: 3px solid #E1E1E1;
+}
+
+td a {
+    text-decoration: none;
+    color: black;
+    font-weight: 700;
+    white-space: nowrap; /* 改行なし */
+}
