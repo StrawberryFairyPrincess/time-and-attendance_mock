@@ -55,7 +55,6 @@ class ProcessController extends Controller
         if ($request->has('sub')) {
             return redirect('/attendance/list')
                 ->with([ //セッションで値を渡す
-                    'monthly' => $monthly,
                     'sub' => $monthly->subMonth()
                 ]);
         }
@@ -63,7 +62,6 @@ class ProcessController extends Controller
         elseif ($request->has('add')) {
             return redirect('/attendance/list')
                 ->with([ //セッションで値を渡す
-                    'monthly' => $monthly,
                     'add' => $monthly->addMonth()
                 ]);
         }
@@ -150,7 +148,7 @@ class ProcessController extends Controller
                         if( (int)explode( ':', $request['realout'] )[0] < 24 ){
                             // 申請された時間が登録されている時間と同じとき
                             if( $value ==
-                                Clock::where('member_id', Auth::id())->whereDate( 'clock', $date )
+                                Clock::where( 'member_id', Auth::id() )->whereDate( 'clock', $date )
                                     ->where( 'status', '退勤' )->latest()->first()['clock']->format('H:i') ){
                                 $clockout = NULL;
                             }

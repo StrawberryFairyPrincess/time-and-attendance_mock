@@ -28,8 +28,13 @@ Route::prefix('/admin')->group(function () {
 // 認証必要：未認証の場合にログインフォームにリダイレクト
 Route::prefix('/admin')->middleware('auth:administrators')->group(function () {
 
-    // 勤怠一覧画面(管理者)の表示
-    Route::get('/attendances',[Admin\DisplayController::class, 'index']);
+    Route::prefix('/attendances')->middleware('auth:administrators')->group(function () {
+
+        // 勤怠一覧画面(管理者)の表示
+        Route::get('',[Admin\DisplayController::class, 'index']);
+        // 日めくり
+        Route::post('',[Admin\ProcessController::class, 'page']);
+    });
 
 });
 

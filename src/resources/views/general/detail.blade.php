@@ -148,7 +148,7 @@
                         {{-- 翌日に退勤のデータがあるとき --}}
                         @if( $tomorrows->where( 'status', '退勤' )->first() != NULL )
                             <?php
-                                $d = $tomorrows->where( 'status', '退勤' )->last()['clock']->format('Hi');
+                                $d = $tomorrows->where( 'status', '退勤' )->first()['clock']->format('Hi');
                                 $h = (int)str_split( $d, 2 )[0] + 24;
                                 $m = (int)str_split( $d, 2 )[1];
                             ?>
