@@ -15,7 +15,7 @@ use App\Models\Correction;
 class ProcessController extends Controller
 {
     // 勤怠一覧画面の日めくり
-    public function page( Request $request )
+    public function daily( Request $request )
     {
         // 勤怠一覧画面を最初に開いたときの日時
         $daily = CarbonImmutable::parse($request['daily']);
@@ -32,6 +32,28 @@ class ProcessController extends Controller
             return redirect('/admin/attendances')
                 ->with([ //セッションで値を渡す
                     'add' => $daily->addDay()
+                ]);
+        }
+    }
+
+    // スタッフ別勤怠一覧画面の月めくり
+    public function monthly( Request $request )
+    {
+        // 勤怠一覧画面を最初に開いたときの日時
+        $monthly = CarbonImmutable::parse($request['monthly']);
+
+        // 前月が押されたとき
+        if ($request->has('sub')) {
+            return redirect('/admin/users/' . $request->member_id . '/attendances')
+                ->with([ //セッションで値を渡す
+                    'sub' => $monthly->subMonth()
+                ]);
+        }
+        // 翌月が押されたとき
+        elseif ($request->has('add')) {
+            return redirect('/admin/users/' . $request->member_id . '/attendances')
+                ->with([ //セッションで値を渡す
+                    'add' => $monthly->addMonth()
                 ]);
         }
     }

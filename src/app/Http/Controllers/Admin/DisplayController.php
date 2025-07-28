@@ -215,6 +215,91 @@ class DisplayController extends Controller
         return view( '/admin/request', compact( 'corrections' ) );
     }
 
+    // スタッフ別勤怠一覧画面の表示
+    public function individual( Request $request )
+    {
+        // 前月が押されたとき
+        if( $request->session()->has('sub') ){
+            $today = $request->session()->get('sub');
+        }
+        // 翌月が押されたとき
+        elseif( $request->session()->has('add') ){
+            $today = $request->session()->get('add');
+        }
+        // 画面を最初に表示したときの日時
+        else{
+            $today = CarbonImmutable::now();
+        }
+
+        $id = $request->member_id;
+
+        // 自分の打刻情報を全て取得
+        $clocks = Clock::where( 'member_id', $id )->get();
+
+        $table = [];
+        $previous = null;
+        foreach( $clocks as $clock ){
+            // 前のデータがないか、前のデータが違う日付のときか、その日の出勤statusが存在しないとき
+            if( $previous == null ||
+                !$clock['clock']->isSameDay( $previous['clock'] ) ||
+                Clock::where( 'member_id', $id )
+                    ->whereDate( 'clock', $clock['clock'] )
+                    ->where( 'status', '出勤' )->get()->isEmpty() ){
+
+                $table[ $clock['clock']->isoFormat('YYYY/MM/DD') ] = [
+                    'clockin' => null,
+                    'clockout' => null,
+                    'break' => 0,
+                    'sum' => 0
+                ];
+            }
+
+            // &をつければ元の配列$tableも編集される
+            // $date: $tableのキー(日付)
+            // $row: 分解した1個の['clockin', 'clockout', 'break', 'sum']
+            foreach( $table as $date => &$row ){
+                // $clockの日付と$rowの$dateが同じときだけデータを入れる
+                if( $date == $clock['clock']->isoFormat('YYYY/MM/DD') ){
+                    // $clockが出勤の打刻のとき
+                    if( $clock['status'] == '出勤' ){
+                        $row['clockin'] = $clock['clock'];
+                    }
+                    // $clockが退勤の打刻のとき
+                    elseif( $clock['status'] == '退勤' ){
+                        // 同日に出勤の打刻があるとき
+                        if( $row['clockin'] != null ){
+                            $row['clockout'] = $clock['clock'];
+                            $row['sum'] = $row['clockin']->diffInSeconds( $row['clockout'] )
+                                - $row['break'];
+                        }
+                        // 退勤の打刻が日付をまたぐとき、前日(出勤の打刻した日)のデータに入れる
+                        else{
+                            $table[ $clock['clock']->subDay()->isoFormat('YYYY/MM/DD') ]['clockout']
+                                = $clock['clock'];
+                            $table[ $clock['clock']->subDay()->isoFormat('YYYY/MM/DD') ]['sum']
+                                = $table[ $clock['clock']->subDay()->isoFormat('YYYY/MM/DD') ]['clockin']
+                                ->diffInSeconds( $table[ $clock['clock']->subDay()->isoFormat('YYYY/MM/DD') ]['clockout'] )
+                                - $table[ $clock['clock']->subDay()->isoFormat('YYYY/MM/DD') ]['break'];
+                        }
+                    }
+                    // $clockが休憩入の打刻のとき
+                    elseif( $clock['status'] == '休憩入' ){
+                        $break = $clock['clock'];
+                    }
+                    // $clockが休憩戻の打刻のとき
+                    elseif( $clock['status'] == '休憩戻' ){
+                        $row['break'] += $break->diffInSeconds( $clock['clock'] );
+                    }
+
+                    break;
+                }
+            }
+
+            $previous = $clock;
+        }
+
+        return view( '/admin/individual', compact( 'id', 'today', 'table' ) );
+    }
 
 
 

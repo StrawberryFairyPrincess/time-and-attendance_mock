@@ -30,23 +30,33 @@ Route::prefix('/admin')->middleware('auth:administrators')->group(function () {
     Route::prefix('/attendances')->group(function () {
 
         // 勤怠一覧画面(管理者)の表示
-        Route::get('',[Admin\DisplayController::class, 'index']);
+        Route::get('', [Admin\DisplayController::class, 'index']);
         // 日めくり
-        Route::post('',[Admin\ProcessController::class, 'page']);
+        Route::post('', [Admin\ProcessController::class, 'daily']);
 
         // 勤怠詳細画面の表示
-        Route::get('/{id}/{date}',[Admin\DisplayController::class, 'detail']);
-
+        Route::get('/{id}/{date}', [Admin\DisplayController::class, 'detail']);
     });
 
     Route::prefix('/requests')->group(function () {
 
         // 申請一覧画面の表示
-        Route::get('',[Admin\DisplayController::class, 'request']);
+        Route::get('', [Admin\DisplayController::class, 'request']);
 
         // 修正申請承認画面の表示
-        Route::get('/{id}/{date}',[Admin\DisplayController::class, 'approve']);
+        Route::get('/{id}/{date}', [Admin\DisplayController::class, 'approve']);
+
+
     });
+
+    Route::prefix('/users/{member_id}/attendances')->group(function () {
+
+        // スタッフ別勤怠一覧画面の表示
+        Route::get('', [Admin\DisplayController::class, 'individual']);
+        // 月めくり
+        Route::post('', [Admin\ProcessController::class, 'monthly']);
+    });
+
 
 });
 
