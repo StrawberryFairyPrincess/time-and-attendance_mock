@@ -323,18 +323,17 @@
         <div class="button">
             <button type="submit">修正</button></form>
         </div>
+        @if( $errors->any() )
+            <div class="form__error">
+                @foreach( $errors->all() as $error )
+                    {{ $error }}</br>
+                @endforeach
+            </div>
+        @endif
     {{-- 修正申請の履歴があるけど未承認のとき --}}
     @elseif( $correction != NULL && $correction['approve'] == '未' )
         <div class="approve">
             ***承認待ちのため修正はできません***
-        </div>
-    @endif
-
-    @if( $errors->any() )
-        <div class="form__error">
-            @foreach( $errors->all() as $error )
-                {{ $error }}</br>
-            @endforeach
         </div>
     @endif
 

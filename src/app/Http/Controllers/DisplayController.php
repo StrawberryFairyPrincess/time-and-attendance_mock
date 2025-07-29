@@ -28,10 +28,11 @@ class DisplayController extends Controller
             }
             // 最後の登録が「退勤」だったときのステータス
             elseif( Auth::user()->clocks()->latest()->first()['status'] == '退勤' ){
+
                 //最後の「退勤」の打刻が当日
                 if( $date->isSameDay( Auth::user()->clocks()->latest()->first()->clock ) ){
                     // 同日に「出勤」の打刻があるとき
-                    if( Clock::whereDate( 'clock', $date )->where( 'status', '出勤' )->first()
+                    if( Clock::where( 'member_id', Auth::id() )->whereDate( 'clock', $date )->where( 'status', '出勤' )->first()
                         != NULL ){
                         $status = '退勤済';
                     }
