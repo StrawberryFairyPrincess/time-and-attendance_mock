@@ -6,6 +6,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+// use Illuminate\Support\Facades\Date;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Carbon\CarbonImmutable;
 use App\Models\Member;
 use App\Models\Clock;
@@ -58,7 +60,49 @@ class ProcessController extends Controller
         }
     }
 
+    // CSVエクスポート機能
+    public function download( Request $request ){
 
+        $csvHeader = [
+            'date',
+            'clock_in',
+            'clock_out',
+            'break',
+            'sum',
+        ];
 
+        $csvData = [];
+        foreach( json_decode( $request->table ) as $date => $row ){
+            $csvData[] = [
+                'date' => $date,
+                'clock_in' => $row->clockin,
+                'clock_out' => $row->clockout,
+                'break' => gmdate( "H:i", $row->break ),
+                'sum' => gmdate( "H:i", $row->sum ),
+            ];
+        }
 
+        $date = CarbonImmutable::parse( $request->date )->format('Y-m');
+        $response = new StreamedResponse(function () use ($csvHeader, $csvData) {
+
+            $createCsvFile = fopen('php://output', 'w');
+
+            mb_convert_variables('SJIS-win', 'UTF-8', $csvHeader);
+            mb_convert_variables('SJIS-win', 'UTF-8', $csvData);
+
+            fputcsv( $createCsvFile, $csvHeader );
+            foreach( $csvData as $csv ){
+                fputcsv( $createCsvFile, $csv );
+            }
+
+            fclose( $createCsvFile );
+
+        }, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' =>
+                'attachment; filename="id_' . $request->id . '_month_' . $date . '.csv"',
+        ]);
+
+        return $response;
+    }
 }

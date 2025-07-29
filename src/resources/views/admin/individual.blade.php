@@ -35,6 +35,9 @@
             </form>
         </div>
 
+        <form action="/admin/download" method="POST">
+            @csrf
+
         <div class="date">
             <table>
 
@@ -130,6 +133,26 @@
 
             </table>
         </div>
+
+        {{-- CSVダウンロードボタン --}}
+        <div class="button-export">
+            <input type="submit" value="CSV出力">
+            <input type="hidden" name="date" value="{{ $today }}">
+            <input type="hidden" name="id" value="{{ $member['id'] }}">
+            <?php
+                foreach( $table as &$row ){
+                    if( $row['clockin'] != NULL ){
+                        $row['clockin'] = $row['clockin']->format('Y-m-d H:i:s');
+                    }
+                    if( $row['clockout'] != NULL ){
+                        $row['clockout'] = $row['clockout']->format('Y-m-d H:i:s');
+                    }
+                }
+            ?>
+            <input type="hidden" name="table" value="{{ json_encode( $table ) }}">
+        </div>
+
+        </form>
 
     </div>
 

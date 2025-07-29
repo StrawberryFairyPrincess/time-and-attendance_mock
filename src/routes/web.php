@@ -65,6 +65,8 @@ Route::prefix('/admin')->middleware('auth:administrators')->group(function () {
 
     });
 
+    // CSV出力
+    Route::post('/download', [Admin\ProcessController::class, 'download']);
 
 });
 

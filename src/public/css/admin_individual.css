@@ -1,12 +1,10 @@
 body {
     background: #F0EFF2;
 }
-
 main {
     display: flex;
     justify-content: center;
 }
-
 .flexbox {
     width: 70%;
 }
@@ -19,7 +17,6 @@ main {
     font-size: 2.1vw;
     font-weight: 700;
 }
-
 .title::before {
     content: "";
     position: absolute;
@@ -48,40 +45,33 @@ main {
     padding-right: 30px;
     margin-bottom: 30px;
 }
-
 .month form {
     width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
-
 .month-center {
     font-size: 1.4vw;
     font-weight: 700;
     color: #000000;
 }
-
 .month-center img {
     height: 1.4vw;
     padding-right: 5px;
 }
-
 .month-side {
     font-size: 1.1vw;
     font-weight: 700;
 }
-
 .month-side img {
     opacity: 0.3;
     height: 1.1vw;
 }
-
 .rotate {
     transform: rotate(180deg);
 }
-
-input[type="submit"] {
+.month-side input[type="submit"] {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -102,34 +92,47 @@ input[type="submit"] {
     width: 100%;
     border-radius: 10px;
 }
-
 table {
     width: 100%;
     font-size: 1.1vw;
     font-weight: 700;
 }
-
 tr:not(:last-child) {
     border-bottom: 2px solid #E1E1E1;
 }
-
 th,
 td {
     padding: 10px;
 }
-
 th {
     border-bottom: 3px solid #E1E1E1;
     text-align: left;
 }
-
 th:first-child,
 td:first-child {
     padding-left: 50px;
     width: 23%;
 }
-
 td a {
     text-decoration: none;
     color: black;
+}
+
+.button-export {
+    margin-top: 30px;
+    display: flex;
+    justify-content: flex-end;
+}
+.button-export input[type="submit"] {
+    padding: 10px 40px;
+    border-radius: 5px;
+    border: none;
+    background: black;
+
+    color: white;
+    font-family: inherit;
+    font-size: 1.5vw;
+    font-weight: 700;
+
+    cursor: pointer;
 }
