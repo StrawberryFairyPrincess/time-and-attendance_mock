@@ -49,12 +49,20 @@ Route::prefix('/admin')->middleware('auth:administrators')->group(function () {
 
     });
 
-    Route::prefix('/users/{member_id}/attendances')->group(function () {
+    Route::prefix('/users')->group(function () {
 
-        // スタッフ別勤怠一覧画面の表示
-        Route::get('', [Admin\DisplayController::class, 'individual']);
-        // 月めくり
-        Route::post('', [Admin\ProcessController::class, 'monthly']);
+        // スタッフ一覧画面の表示
+        Route::get('', [Admin\DisplayController::class, 'staff']);
+
+        Route::prefix('/{member_id}/attendances')->group(function () {
+
+            // スタッフ別勤怠一覧画面の表示
+            Route::get('', [Admin\DisplayController::class, 'individual']);
+            // 月めくり
+            Route::post('', [Admin\ProcessController::class, 'monthly']);
+        });
+
+
     });
 
 

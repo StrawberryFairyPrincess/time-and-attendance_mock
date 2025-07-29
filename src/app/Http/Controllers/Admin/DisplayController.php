@@ -215,6 +215,14 @@ class DisplayController extends Controller
         return view( '/admin/request', compact( 'corrections' ) );
     }
 
+    // スタッフ一覧画面の表示
+    public function staff()
+    {
+        $members = Member::all();
+
+        return view( '/admin/staff', compact( 'members' ) );
+    }
+
     // スタッフ別勤怠一覧画面の表示
     public function individual( Request $request )
     {
@@ -231,10 +239,10 @@ class DisplayController extends Controller
             $today = CarbonImmutable::now();
         }
 
-        $id = $request->member_id;
+        $member = Member::where( 'id', $request->member_id )->first();
 
         // 自分の打刻情報を全て取得
-        $clocks = Clock::where( 'member_id', $id )->get();
+        $clocks = Clock::where( 'member_id', $request->member_id )->get();
 
         $table = [];
         $previous = null;
@@ -242,7 +250,7 @@ class DisplayController extends Controller
             // 前のデータがないか、前のデータが違う日付のときか、その日の出勤statusが存在しないとき
             if( $previous == null ||
                 !$clock['clock']->isSameDay( $previous['clock'] ) ||
-                Clock::where( 'member_id', $id )
+                Clock::where( 'member_id', $request->member_id )
                     ->whereDate( 'clock', $clock['clock'] )
                     ->where( 'status', '出勤' )->get()->isEmpty() ){
 
@@ -298,11 +306,6 @@ class DisplayController extends Controller
             $previous = $clock;
         }
 
-        return view( '/admin/individual', compact( 'id', 'today', 'table' ) );
+        return view( '/admin/individual', compact( 'member', 'today', 'table' ) );
     }
-
-
-
-
-
 }

@@ -3,18 +3,18 @@
 @extends('layouts.app')
 
 @section('css')
-    <link rel="stylesheet" href="{{ asset('css/general_index.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/admin_individual.css') }}" />
 @endsection
 
 @section('content')
 <div class="flexbox">
 
-    <div class="title">勤怠一覧</div>
+    <div class="title">{{ $member['name'] }}さんの勤怠一覧</div>
 
     <div class="list">
 
         <div class="month">
-            <form action="{{ '/admin/users/' . $id . '/attendances' }}" method="POST">
+            <form action="{{ '/admin/users/' . $member['id'] . '/attendances' }}" method="POST">
                 @csrf
                 <input type="hidden" name="monthly" value="{{ $today }}">
 
@@ -117,7 +117,7 @@
                     {{-- 詳細(出勤の打刻がある日だけ) --}}
                     <td>
                         @if( $table[$date->isoFormat('YYYY/MM/DD')]['clockin'] != null )
-                            <a href="{{ '/admin/attendances/' . $id . '/' . $date->isoFormat('YYYYMMDD') }}">
+                            <a href="{{ '/admin/attendances/' . $member['id'] . '/' . $date->isoFormat('YYYYMMDD') }}">
                                 詳細
                             </a>
                         @endif

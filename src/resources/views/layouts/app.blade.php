@@ -75,7 +75,7 @@
                                 </form>
                             </li>
                             <li class="header-nav__item">
-                                <form class="header-nav__button" action="/stamp_correction_request/list?tab=yet" method="GET">
+                                <form class="header-nav__button" action="/stamp_correction_request/list" method="GET">
                                     @csrf
                                     <button type="submit">申請</button>
                                 </form>
