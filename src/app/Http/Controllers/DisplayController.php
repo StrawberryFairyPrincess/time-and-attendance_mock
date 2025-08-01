@@ -22,15 +22,15 @@ class DisplayController extends Controller
         // データベースにログインユーザのデータがあるとき
         if( Clock::where( 'member_id', Auth::id() )->exists() ){
             // 最後の登録が「出勤」か「休憩戻」だったときのステータス
-            if( Auth::user()->clocks()->latest()->first()['status'] == '出勤' ||
-                Auth::user()->clocks()->latest()->first()['status'] == '休憩戻' ){
+            if( Auth::user()->clocks()->orderBy( 'clock', 'desc' )->first()['status'] == '出勤' ||
+                Auth::user()->clocks()->orderBy( 'clock', 'desc' )->first()['status'] == '休憩戻' ){
                 $status = '出勤中';
             }
             // 最後の登録が「退勤」だったときのステータス
-            elseif( Auth::user()->clocks()->latest()->first()['status'] == '退勤' ){
+            elseif( Auth::user()->clocks()->orderBy( 'clock', 'desc' )->first()['status'] == '退勤' ){
 
                 //最後の「退勤」の打刻が当日
-                if( $date->isSameDay( Auth::user()->clocks()->latest()->first()->clock ) ){
+                if( $date->isSameDay( Auth::user()->clocks()->orderBy( 'clock', 'desc' )->first()->clock ) ){
                     // 同日に「出勤」の打刻があるとき
                     if( Clock::where( 'member_id', Auth::id() )->whereDate( 'clock', $date )->where( 'status', '出勤' )->first()
                         != NULL ){
@@ -47,7 +47,7 @@ class DisplayController extends Controller
                 }
             }
             // 最後の登録が「休憩入」だったときのステータス
-            elseif( Auth::user()->clocks()->latest()->first()['status'] == '休憩入' ){
+            elseif( Auth::user()->clocks()->orderBy( 'clock', 'desc' )->first()['status'] == '休憩入' ){
                 $status = '休憩中';
             }
         }
@@ -76,7 +76,8 @@ class DisplayController extends Controller
         }
 
         // 自分の打刻情報を全て取得
-        $clocks = Clock::where( 'member_id', Auth::id() )->get();
+        $clocks = Clock::where( 'member_id', Auth::id() )
+                    ->orderBy( 'clock', 'asc' )->get();
 
         $table = [];
         $previous = null;
@@ -153,13 +154,13 @@ class DisplayController extends Controller
         $date = CarbonImmutable::parse( $year . '-' . $month . '-' . $day );
 
         // その日と次の日の打刻を取得
-        $clocks = Clock::where( 'member_id', Auth::id() )->whereDate( 'clock', $date )->get();
-        $tomorrows = Clock::where( 'member_id', Auth::id() )->whereDate( 'clock', $date->addDay() )->get();
+        $clocks = Clock::where( 'member_id', Auth::id() )->orderBy( 'clock', 'asc' )->whereDate( 'clock', $date )->get();
+        $tomorrows = Clock::where( 'member_id', Auth::id() )->orderBy( 'clock', 'asc' )->whereDate( 'clock', $date->addDay() )->get();
 
         // その日の修正申請を取得
         $correction =
             Correction::where( 'member_id', Auth::id() )->whereDate( 'date', $date )
-                ->latest()->first();
+                ->orderBy( 'date', 'desc' )->first();
 
         return view( '/general/detail', compact( 'date', 'clocks', 'tomorrows', 'correction' ) );
     }

@@ -217,7 +217,7 @@
                             {{-- 修正申請の履歴があるけど未承認のとき --}}
                             @elseif( $correction != NULL && $correction['approve'] == '未' )
                                 {{-- 申請履歴があって休憩入時刻の申請があるとき --}}
-                                @if( $correction['breaks']['take' . $i] != NULL )
+                                @if( isset( $correction['breaks']['take' . $i] ) && $correction['breaks']['take' . $i] != NULL )
                                     {{ explode( ':', explode( ' ', $correction['breaks']['take' . $i] )[1] )[0] }}:{{ explode( ':', explode( ' ', $correction['breaks']['take' . $i] )[1] )[1] }}
                                 {{-- 申請履歴があるけど休憩入時刻の申請はしていないとき --}}
                                 @else
@@ -234,7 +234,7 @@
                         {{-- 修正申請の履歴があるけど未承認のとき --}}
                         @elseif( $correction != NULL && $correction['approve'] == '未' )
                             {{-- 申請履歴があって休憩戻の申請があるとき --}}
-                            @if( $correction['breaks']['back' . $i] != NULL )
+                            @if( isset( $correction['breaks']['back' . $i] ) && $correction['breaks']['back' . $i] != NULL )
                                 {{ explode( ':', explode( ' ', $correction['breaks']['back' . $i] )[1] )[0] }}:{{ explode( ':', explode( ' ', $correction['breaks']['back' . $i] )[1] )[1] }}
                             @endif
                         @endif
@@ -249,7 +249,7 @@
                             {{-- 修正申請の履歴があるけど未承認のとき --}}
                             @elseif( $correction != NULL && $correction['approve'] == '未' )
                                 {{-- 申請履歴があって休憩戻時刻の申請があるとき --}}
-                                @if( $correction['breaks']['back' . $i] != NULL )
+                                @if( isset( $correction['breaks']['back' . $i] ) && $correction['breaks']['back' . $i] != NULL )
                                     {{ explode( ':', explode( ' ', $correction['breaks']['back' . $i] )[1] )[0] }}:{{ explode( ':', explode( ' ', $correction['breaks']['back' . $i] )[1] )[1] }}
                                 {{-- 申請履歴があるけど休憩戻時刻の申請はしていないとき --}}
                                 @else

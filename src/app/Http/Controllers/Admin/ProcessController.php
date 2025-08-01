@@ -60,6 +60,158 @@ class ProcessController extends Controller
         }
     }
 
+    public function approve( Request $request ){
+
+        // クエリパラメータから日付を取得
+        $year = (int)str_split( $request->date, 4 )[0];
+        $month = (int)str_split( str_split( $request->date, 4 )[1], 2 )[0];
+        $day = (int)str_split( str_split( $request->date, 4 )[1], 2 )[1];
+        $date = CarbonImmutable::parse( $year . '-' . $month . '-' . $day );
+
+        // その日と次の日の打刻を取得
+        $clocks =
+            Clock::where( 'member_id', $request->id )
+                ->whereDate( 'clock', $date )->orderBy( 'clock', 'asc' )->get();
+        $tomorrows =
+            Clock::where( 'member_id', $request->id )
+                ->whereDate( 'clock', $date->addDay() )->orderBy( 'clock', 'asc' )->get();
+
+        // その日の修正申請を取得
+        $correction =
+            Correction::where( 'member_id', $request->id )
+                ->whereDate( 'date', $date )->orderBy( 'date', 'desc' )->first();
+
+        // 出勤の申請があるとき更新
+        if( $correction['clockin'] != NULL ){
+            $clock = $clocks->where( 'status', '出勤' )->first();
+            $clock['clock'] = $correction['clockin'];
+            $clock['updated_at'] = CarbonImmutable::now();
+            $clock->save();
+        }
+
+        // 退勤の申請があるとき更新
+        if( $correction['clockout'] != NULL ){
+
+            // 実際の退勤があるとき
+            if( isset( $request['realout'] ) ){
+                // 実際の退勤を取得(退勤の申請があるときだけ取得される)
+                $realout = CarbonImmutable::parse( $request['realout'] );
+
+                // 実際の退勤が当日
+                if( $realout->isSameDay( $date ) ){
+                    $clock = $clocks->where( 'status', '退勤' )->last();
+                }
+                // 実際の退勤が翌日
+                else{
+                    $clock = $tomorrows->where( 'status', '退勤' )->first();
+                }
+
+                $clock['clock'] = $correction['clockout'];
+                $clock['updated_at'] = CarbonImmutable::now();
+                $clock->save();
+            }
+            // 実際の退勤がないとき
+            else{
+                // 新しくレコードを作成
+                $clock = [
+                    'member_id' => $request->id,
+                    'clock' => $correction['clockout'],
+                    'status' => '退勤',
+                    'created_at' => CarbonImmutable::now()
+                ];
+                Clock::create( $clock );
+            }
+        }
+
+        $takes =
+            Clock::where( 'member_id', $request->id )->where( 'status', '休憩入' )
+                ->whereDate( 'clock', $date )->orderBy( 'clock', 'asc' )->get();
+        $backs =
+            Clock::where( 'member_id', $request->id )->where( 'status', '休憩戻' )
+                ->whereDate( 'clock', $date )->orderBy( 'clock', 'asc' )->get();
+        $i = 0;
+        $j = 0;
+        foreach( $correction['breaks'] as $key => $time ){
+
+            // キーが休憩入
+            if( strpos( $key, 'take' ) === 0 ){
+
+                // 休憩入の申請があるとき
+                if( $time != NULL ){
+
+                    // 実際の休憩入があるとき
+                    if( isset( $takes[ $i ] ) ){
+                        $clock = $takes[ $i ];
+                        $clock['clock'] = CarbonImmutable::parse( $correction['breaks'][ $key ] );
+                        $clock['updated_at'] = CarbonImmutable::now();
+                        $clock->save();
+                    }
+                    // 実際の休憩入がないとき(新しく登録する休憩)
+                    else{
+                        // 新しくレコードを作成
+                        $clock = [
+                            'member_id' => $request->id,
+                            'clock' => CarbonImmutable::parse( $correction['breaks'][ $key ] ),
+                            'status' => '休憩入',
+                            'created_at' => CarbonImmutable::now()
+                        ];
+                        Clock::create( $clock );
+                    }
+                }
+
+                $i++;
+            }
+
+            // キーが休憩戻
+            if( strpos( $key, 'back' ) === 0 ){
+
+                // 休憩戻の申請があるとき
+                if( $time != NULL ){
+
+                    // 実際の休憩戻があるとき
+                    if( isset( $backs[ $j ] ) ){
+                        $clock = $backs[ $j ];
+                        $clock['clock'] = CarbonImmutable::parse( $correction['breaks'][ $key ] );
+                        $clock['updated_at'] = CarbonImmutable::now();
+                        $clock->save();
+                    }
+                    // 実際の休憩戻がないとき(新しく登録する休憩)
+                    else{
+                        // 新しくレコードを作成
+                        $clock = [
+                            'member_id' => $request->id,
+                            'clock' => CarbonImmutable::parse( $correction['breaks'][ $key ] ),
+                            'status' => '休憩戻',
+                            'created_at' => CarbonImmutable::now()
+                        ];
+                        Clock::create( $clock );
+                    }
+                }
+
+                $j++;
+            }
+        }
+
+        // Correctionsテーブルを済にする
+        $correction['approve'] = '済';
+        $correction['updated_at'] = CarbonImmutable::now();
+        $correction->save();
+
+        return redirect()->back();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
     // CSVエクスポート機能
     public function download( Request $request ){
 

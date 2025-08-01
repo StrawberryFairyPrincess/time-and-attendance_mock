@@ -31,8 +31,8 @@ class DisplayController extends Controller
         }
 
         // その日の打刻情報を全て取得
-        $clocks = Clock::whereDate( 'clock', $today )->get();
-        $tomorrows = Clock::whereDate( 'clock', $today->addDay() )->get();
+        $clocks = Clock::whereDate( 'clock', $today )->orderBy( 'clock', 'asc' )->get();
+        $tomorrows = Clock::whereDate( 'clock', $today->addDay() )->orderBy( 'clock', 'asc' )->get();
 
         $table = [];
         $previous = null;
@@ -40,8 +40,8 @@ class DisplayController extends Controller
 
             // 当日の出勤のデータがデータベースに存在して、
             // $memberの$tableのデータを作ってなかったら作る
-            if( Clock::where( 'member_id', $member )->whereDate( 'clock', $today )
-                    ->where( 'status', '出勤' )->exists()
+            if( Clock::where( 'member_id', $member )->where( 'status', '出勤' )
+                    ->orderBy( 'clock', 'asc' )->whereDate( 'clock', $today )->exists()
                 && !isset( $table[ $member ] ) ){
 
                     $table[ $member ] = [
@@ -155,15 +155,15 @@ class DisplayController extends Controller
         // その日と次の日の打刻を取得
         $clocks =
             Clock::where( 'member_id', $request->id )
-                ->whereDate( 'clock', $date )->get();
+                ->whereDate( 'clock', $date )->orderBy( 'clock', 'asc' )->get();
         $tomorrows =
             Clock::where( 'member_id', $request->id )
-                ->whereDate( 'clock', $date->addDay() )->get();
+                ->whereDate( 'clock', $date->addDay() )->orderBy( 'clock', 'asc' )->get();
 
         // その日の修正申請を取得
         $correction =
             Correction::where( 'member_id', $request->id )
-                ->whereDate( 'date', $date )->latest()->first();
+                ->whereDate( 'date', $date )->orderBy( 'date', 'desc' )->first();
 
         return view( '/admin/detail',
             compact( 'member', 'date', 'clocks', 'tomorrows', 'correction' ) );
@@ -184,15 +184,15 @@ class DisplayController extends Controller
         // その日と次の日の打刻を取得
         $clocks =
             Clock::where( 'member_id', $request->id )
-                ->whereDate( 'clock', $date )->get();
+                ->whereDate( 'clock', $date )->orderBy( 'clock', 'asc' )->get();
         $tomorrows =
             Clock::where( 'member_id', $request->id )
-                ->whereDate( 'clock', $date->addDay() )->get();
+                ->whereDate( 'clock', $date->addDay() )->orderBy( 'clock', 'asc' )->get();
 
         // その日の修正申請を取得
         $correction =
             Correction::where( 'member_id', $request->id )
-                ->whereDate( 'date', $date )->latest()->first();
+                ->whereDate( 'date', $date )->orderBy( 'date', 'desc' )->first();
 
         return view( '/admin/approve',
             compact( 'member', 'date', 'clocks', 'tomorrows', 'correction' ) );
@@ -204,12 +204,12 @@ class DisplayController extends Controller
         // ?tab=doneだったとき
         if( $request->tab == 'done' ){
             $corrections =
-                Correction::where( 'approve', '済' )->get();
+                Correction::where( 'approve', '済' )->orderBy( 'date', 'asc' )->get();
         }
         // ?tab=yetかtabなしで表示したとき
         else{
             $corrections =
-                Correction::where( 'approve', '未' )->get();
+                Correction::where( 'approve', '未' )->orderBy( 'date', 'asc' )->get();
         }
 
         return view( '/admin/request', compact( 'corrections' ) );
@@ -242,7 +242,7 @@ class DisplayController extends Controller
         $member = Member::where( 'id', $request->member_id )->first();
 
         // 自分の打刻情報を全て取得
-        $clocks = Clock::where( 'member_id', $request->member_id )->get();
+        $clocks = Clock::where( 'member_id', $request->member_id )->orderBy( 'clock', 'asc' )->get();
 
         $table = [];
         $previous = null;
@@ -251,7 +251,7 @@ class DisplayController extends Controller
             if( $previous == null ||
                 !$clock['clock']->isSameDay( $previous['clock'] ) ||
                 Clock::where( 'member_id', $request->member_id )
-                    ->whereDate( 'clock', $clock['clock'] )
+                    ->whereDate( 'clock', $clock['clock'] )->orderBy( 'clock', 'asc' )
                     ->where( 'status', '出勤' )->get()->isEmpty() ){
 
                 $table[ $clock['clock']->isoFormat('YYYY/MM/DD') ] = [

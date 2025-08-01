@@ -20,7 +20,8 @@ class ProcessController extends Controller
         $clock = [
             'member_id' => Auth::id(),
             'clock' => CarbonImmutable::now(), //ボタンを押したときの時間
-            'status' => null
+            'status' => null,
+            'created_at' => CarbonImmutable::now()
         ];
 
         // 出勤ボタンが押されたとき
@@ -95,7 +96,7 @@ class ProcessController extends Controller
             if( $key == 'clockin' ){
                 // 申請された時間が登録されている時間と同じとき
                 if( $value ==
-                    Clock::where( 'member_id', Auth::id() )->whereDate( 'clock', $date )
+                    Clock::where( 'member_id', Auth::id() )->orderBy( 'clock', 'asc' )->whereDate( 'clock', $date )
                         ->where( 'status', '出勤' )->first()['clock']->format('H:i') ){
                     $clockin = NULL;
                 }
@@ -130,8 +131,8 @@ class ProcessController extends Controller
                         elseif( (int)explode( ':', $request['realout'] )[0] >= 24 ){
                             // 申請された時間が登録されている時間と同じとき
                             if( $value ==
-                                Clock::where( 'member_id', Auth::id() )
-                                    ->whereDate( 'clock', $date->addDay() )->where( 'status', '退勤' )
+                                Clock::where( 'member_id', Auth::id() )->where( 'status', '退勤' )
+                                    ->orderBy( 'clock', 'asc' )->whereDate( 'clock', $date->addDay() )
                                     ->first()['clock']->format('H:i') ){
                                 $clockout = NULL;
                             }
@@ -161,8 +162,9 @@ class ProcessController extends Controller
                         elseif( (int)explode( ':', $request['realout'] )[0] < 24 ){
                             // 申請された時間が登録されている時間と同じとき
                             if( $value ==
-                                Clock::where( 'member_id', Auth::id() )->whereDate( 'clock', $date )
-                                    ->where( 'status', '退勤' )->latest()->first()['clock']->format('H:i') ){
+                                Clock::where( 'member_id', Auth::id() )->where( 'status', '退勤' )
+                                    ->orderBy( 'clock', 'desc' )->whereDate( 'clock', $date )
+                                    ->first()['clock']->format('H:i') ){
                                 $clockout = NULL;
                             }
                             // 申請された時間が登録されている時間から変更されているとき
@@ -201,8 +203,9 @@ class ProcessController extends Controller
                 // $valueが00:00じゃないとき
                 else{
                     // Clockに登録ののある休憩
-                    foreach( Clock::where( 'member_id', Auth::id() )->whereDate( 'clock', $date )
-                            ->where( 'status', '休憩入' )->get() as $j => $take ){
+                    foreach( Clock::where( 'member_id', Auth::id() )->where( 'status', '休憩入' )
+                            ->orderBy( 'clock', 'asc' )->whereDate( 'clock', $date )
+                            ->get() as $j => $take ){
                         // キーに振られた番号を見て(最後の文字)foreachと同じ番目の時だけ
                         if( substr( $key, -1 ) == $i && ( $i == $j+1 ) ){
                             // 申請された時間が登録されている時間と同じとき
@@ -243,8 +246,9 @@ class ProcessController extends Controller
                 // $valueが00:00じゃないとき
                 else{
                     // Clockに登録ののある休憩
-                    foreach( Clock::where( 'member_id', Auth::id() )->whereDate( 'clock', $date )
-                            ->where( 'status', '休憩戻' )->get() as $j => $back ){
+                    foreach( Clock::where( 'member_id', Auth::id() )->where( 'status', '休憩戻' )
+                            ->orderBy( 'clock', 'asc' )->whereDate( 'clock', $date )
+                            ->get() as $j => $back ){
                         // キーに振られた番号を見て(最後の文字)foreachと同じ番目の時だけ
                         if( substr( $key, -1 ) == $i && ( $i == $j+1 ) ){
                             // 申請された時間が登録されている時間と同じとき

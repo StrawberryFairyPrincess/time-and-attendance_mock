@@ -43,10 +43,13 @@ Route::prefix('/admin')->middleware('auth:administrators')->group(function () {
         // 申請一覧画面の表示
         Route::get('', [Admin\DisplayController::class, 'request']);
 
-        // 修正申請承認画面の表示
-        Route::get('/{id}/{date}', [Admin\DisplayController::class, 'approve']);
+        Route::prefix('/{id}/{date}')->group(function () {
 
-
+            // 修正申請承認画面の表示
+            Route::get('', [Admin\DisplayController::class, 'approve']);
+            // 修正申請を承認
+            Route::post('', [Admin\ProcessController::class, 'approve']);
+        });
     });
 
     Route::prefix('/users')->group(function () {
@@ -67,7 +70,6 @@ Route::prefix('/admin')->middleware('auth:administrators')->group(function () {
 
     // CSV出力
     Route::post('/download', [Admin\ProcessController::class, 'download']);
-
 });
 
 // 一般ユーザ

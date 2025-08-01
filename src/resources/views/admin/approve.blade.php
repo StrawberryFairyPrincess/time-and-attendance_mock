@@ -80,6 +80,9 @@
                                     @else
                                         {{ (int)explode( ':', $correction['clockout']->format('H:i') )[0] + 24 }}:{{ explode( ':', $correction['clockout']->format('H:i') )[1] }}
                                     @endif
+                                    <input type="hidden" name="realout"
+                                        value="{{ $clocks->where( 'status', '退勤' )
+                                            ->last()['clock']->format('Y-m-d H:i:s') }}">
                                 {{-- 申請履歴があるけど退勤時刻の申請はしていないとき --}}
                                 @else
                                     {{ $clocks->where( 'status', '退勤' )->last()['clock']->format('H:i') }}
@@ -109,6 +112,9 @@
                                         @else
                                             {{ (int)explode( ':', $correction['clockout']->format('H:i') )[0] + 24 }}:{{ explode( ':', $correction['clockout']->format('H:i') )[1] }}
                                         @endif
+                                        <input type="hidden" name="realout"
+                                            value="{{ $tomorrows->where( 'status', '退勤' )
+                                                ->first()['clock']->format('Y-m-d H:i:s') }}">
                                     {{-- 申請履歴があるけど退勤時刻の申請はしていないとき --}}
                                     @else
                                         {{ $h }}:{{ sprintf("%02d", $m) }}
@@ -158,6 +164,9 @@
                                     @else
                                         {{ (int)explode( ':', $correction['clockout']->format('H:i') )[0] + 24 }}:{{ explode( ':', $correction['clockout']->format('H:i') )[1] }}
                                     @endif
+                                    <input type="hidden" name="realout"
+                                        value="{{ $tomorrows->where( 'status', '退勤' )
+                                            ->first()['clock']->format('Y-m-d H:i:s') }}">
                                 {{-- 申請履歴があるけど退勤時刻の申請はしていないとき --}}
                                 @else
                                     {{ $h }}:{{ sprintf("%02d", $m) }}
