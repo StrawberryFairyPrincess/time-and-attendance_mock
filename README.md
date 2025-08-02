@@ -70,6 +70,7 @@ PHPUnit環境構築
 		ログアウト
 			``` bash
 			exit
+			```
 	3. .envファイルをコピーして.env.testingを作成
 	4. .env.testingの以下の環境変数を変更
 		``` text
