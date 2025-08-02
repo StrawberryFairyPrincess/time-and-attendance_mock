@@ -126,11 +126,9 @@ class CorrectionRequest extends FormRequest
                 }
             }
 
-            $i--;
-            $j--;
             // 追加の休憩はペアで入力しないとエラー
-            if( ( isset( $take[$i] ) && !isset( $back[$i] ) ) ||
-                ( !isset( $take[$j] ) && isset( $back[$j] ) ) ){
+            if( ( isset( $take[--$i] ) && !isset( $back[$i] ) ) ||
+                ( !isset( $take[--$j] ) && isset( $back[$j] ) ) ){
                 $validator->errors()->add( 'take'. $i, '休憩時間の追加は休憩入と休憩戻の両方入力してください' );
             }
         });

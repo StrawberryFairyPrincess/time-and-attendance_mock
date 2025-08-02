@@ -6,7 +6,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-// use Illuminate\Support\Facades\Date;
+use App\Http\Requests\CorrectionRequest;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Carbon\CarbonImmutable;
 use App\Models\Member;
@@ -200,17 +200,343 @@ class ProcessController extends Controller
         return redirect()->back();
     }
 
+    // 勤怠修正
+    public function correct( CorrectionRequest $request ){
 
+        // クエリパラメータから日付を取得
+        $year = (int)str_split( $request->date, 4 )[0];
+        $month = (int)str_split( str_split( $request->date, 4 )[1], 2 )[0];
+        $day = (int)str_split( str_split( $request->date, 4 )[1], 2 )[1];
+        $date = CarbonImmutable::parse( $year . '-' . $month . '-' . $day );
 
+        // その日と次の日の打刻を取得
+        $clocks =
+            Clock::where( 'member_id', $request->id )
+                ->whereDate( 'clock', $date )->orderBy( 'clock', 'asc' )->get();
+        $tomorrows =
+            Clock::where( 'member_id', $request->id )
+                ->whereDate( 'clock', $date->addDay() )->orderBy( 'clock', 'asc' )->get();
 
+        // takeとbackの最後の要素を見るためにキーを抽出
+        $takekeys = [];
+        $backkeys = [];
+        foreach( array_keys( $request->validated() ) as $key ){
+            if ( strpos( $key, 'take' ) !== false ){
+                $takekeys[] = $key;
+            }
+            elseif ( strpos( $key, 'back' ) !== false ){
+                $backkeys[] = $key;
+            }
+        }
 
+        $breaks = [];
+        $i = 1; // キーtakeとbackの振り番号をみる
+        foreach( $request->validated() as $key => $value ){
 
+            // キーが'clockin'のとき
+            if( $key == 'clockin' ){
+                // 申請された時間が登録されている時間から変更されているとき
+                if( $value !=
+                    Clock::where( 'member_id', $request->id )
+                        ->orderBy( 'clock', 'asc' )->whereDate( 'clock', $date )
+                        ->where( 'status', '出勤' )->first()['clock']->format('H:i') ){
 
+                    // Clockテーブル
+                    $clock = $clocks->where( 'status', '出勤' )->first();
+                    $clock['clock'] =
+                        CarbonImmutable::parse( $year . '-' . $month . '-' . $day . ' ' . $value );
+                    $clock['updated_at'] = CarbonImmutable::now();
+                    $clock->save();
 
+                    // Correctionテーブル
+                    $clockin =
+                        CarbonImmutable::parse( $year . '-' . $month . '-' . $day . ' ' . $value );
+                }
+                // 申請された時間が登録されている時間と同じとき
+                else{
+                    $clockin = NULL;
+                }
+            }
 
+            // キーが'clockout'のとき
+            elseif( $key == 'clockout' ){
 
+                // $valueが00:00のとき
+                if( $value == '00:00' ){
+                    $clockout = NULL;
+                }
+                // $valueが00:00じゃないとき
+                else{
+                    $h = (int)explode( ':', $value )[0];
+                    $m = (int)explode( ':', $value )[1];
 
+                    // 日を跨いだ退勤時間を申請するとき
+                    if( $h > 24 ){
+                        $h -= 24;
 
+                        // 実際の退勤のデータがないとき
+                        if( empty( $request['realout'] ) ){
+                            // Clockテーブル
+                            $clock = [
+                                'member_id' => $request->id,
+                                'clock' => CarbonImmutable::parse( $year . '-' . $month . '-' . $day . ' ' . $h . ':' . $m ),
+                                'status' => '退勤',
+                                'created_at' => CarbonImmutable::now()
+                            ];
+                            Clock::create( $clock );
+
+                            // Correctionテーブル
+                            $clockout =
+                                CarbonImmutable::parse( $year . '-' . $month . '-' . $day . ' ' . $h . ':' . $m );
+                        }
+                        // 実際の打刻も日を跨いでいる
+                        elseif( (int)explode( ':', $request['realout'] )[0] >= 24 ){
+                            // 申請された時間が登録されている時間から変更されているとき
+                            if( $value !=
+                                Clock::where( 'member_id', $request->id )->where( 'status', '退勤' )
+                                ->whereDate( 'clock', $date->addDay() )->orderBy( 'clock', 'asc' )
+                                ->first()['clock']->format('H:i') ){
+
+                                // Clockテーブル
+                                $clock = $tomorrows->where( 'status', '退勤' )->first();
+                                $clock['clock'] = CarbonImmutable::parse( $year . '-' . $month . '-' . $day . ' ' . $h . ':' . $m );
+                                $clock['updated_at'] = CarbonImmutable::now();
+                                $clock->save();
+
+                                // Correctionテーブル
+                                $clockout =
+                                    CarbonImmutable::parse( $year . '-' . $month . '-' . $day .
+                                    ' ' . $h . ':' . $m );
+                            }
+                            // 申請された時間が登録されている時間と同じとき
+                            else{
+                                $clockout = NULL;
+                            }
+                        }
+                        // 実際の打刻はその日中
+                        else{
+                            $next = $day + 1;
+
+                            // Clockテーブル
+                            $clock = $clocks->where( 'status', '退勤' )->last();
+                            $clock['clock'] = CarbonImmutable::parse( $year . '-' . $month . '-' . $next . ' ' . $h . ':' . $m );
+                            $clock['updated_at'] = CarbonImmutable::now();
+                            $clock->save();
+
+                            // Correctionテーブル
+                            $clockout = CarbonImmutable::parse( $year . '-' . $month . '-' . $next .
+                                                                ' ' . $h . ':' . $m );
+                        }
+                    }
+                    // その日中の退勤時間を申請するとき
+                    else{
+                        // 実際の退勤のデータがないとき
+                        if( empty( $request['realout'] ) ){
+                            // Clockテーブル
+                            $clock = [
+                                'member_id' => $request->id,
+                                'clock' => CarbonImmutable::parse( $year . '-' . $month . '-' . $day . ' ' . $h . ':' . $m ),
+                                'status' => '退勤',
+                                'created_at' => CarbonImmutable::now()
+                            ];
+                            Clock::create( $clock );
+
+                            // Correctionテーブル
+                            $clockout =
+                                CarbonImmutable::parse( $year . '-' . $month . '-' . $day .
+                                                        ' ' . $h . ':' . $m );
+                        }
+                        // 実際の打刻もその日中
+                        elseif( (int)explode( ':', $request['realout'] )[0] < 24 ){
+                            // 申請された時間が登録されている時間から変更されているとき
+                            if( $value !=
+                                Clock::where( 'member_id', $request->id )->where( 'status', '退勤' )
+                                    ->whereDate( 'clock', $date )->orderBy( 'clock', 'desc' )
+                                    ->first()['clock']->format('H:i') ){
+
+                                // Clockテーブル
+                                $clock = $clocks->where( 'status', '退勤' )->last();
+                                $clock['clock'] = CarbonImmutable::parse( $year . '-' . $month . '-' . $day . ' ' . $value );
+                                $clock['updated_at'] = CarbonImmutable::now();
+                                $clock->save();
+
+                                // Correctionテーブル
+                                $clockout =
+                                    CarbonImmutable::parse( $year . '-' . $month . '-' . $day .
+                                                            ' ' . $value );
+                            }
+                            // 申請された時間が登録されている時間と同じとき
+                            else{
+                                $clockout = NULL;
+                            }
+                        }
+                        // 実際の打刻は日を跨いでいる
+                        else{
+                            // Clockテーブル
+                            $clock = $tomorrows->where( 'status', '退勤' )->first();
+                            $clock['clock'] = CarbonImmutable::parse( $year . '-' . $month . '-' . $day . ' ' . $value );
+                            $clock['updated_at'] = CarbonImmutable::now();
+                            $clock->save();
+
+                            // Correctionテーブル
+                            $clockout = CarbonImmutable::parse( $year . '-' . $month . '-' . $day .
+                                                                ' ' . $value );
+                        }
+                    }
+                }
+            }
+
+            // 'take'から始まるキーのとき
+            elseif( strpos( $key, 'take' ) === 0 ){
+
+                // takeの$valueが00:00のとき
+                if( $value == '00:00' ){
+                    // 最後のキーのとき
+                    if( $key == end( $takekeys ) ){
+                        // backが00:00のとき
+                        if( $request->validated()[ end( $backkeys ) ] == '00:00' ){
+                        }
+                        // backに時間の登録があるとき
+                        else{
+                            $breaks[ $key ] = NULL;
+                        }
+                    }
+                    // 最後のキーじゃなければNULL扱い
+                    else{
+                        $breaks[ $key ] = NULL;
+                    }
+                }
+                // $valueが00:00じゃないとき
+                else{
+                    // Clockに登録のある休憩
+                    foreach( Clock::where( 'member_id', $request->id )->where( 'status', '休憩入' )
+                                ->whereDate( 'clock', $date )->orderBy( 'clock', 'asc' )->get()
+                            as $j => $take ){
+
+                        // キーに振られた番号を見て(最後の文字)foreachと同じ番目の時だけ
+                        if( substr( $key, -1 ) == $i && ( $i == $j+1 ) ){
+                            // 申請された時間が登録されている時間から変更されているとき
+                            if( $value != $take['clock']->format('H:i') ){
+                                // Clockテーブル
+                                $clock = $take;
+                                $clock['clock'] = CarbonImmutable::parse( $year . '-' . $month . '-' . $day . ' ' . $value );
+                                $clock['updated_at'] = CarbonImmutable::now();
+                                $clock->save();
+
+                                // Correctionテーブル
+                                $breaks[ $key ] =
+                                    $year . '-' . $month . '-' . $day . ' ' . $value . ':00';
+                            }
+                            // 申請された時間が登録されている時間と同じとき
+                            else{
+                                $breaks[ $key ] = NULL;
+                            }
+                        }
+                    }
+                    // Clockに登録のない新しい休憩
+                    if( $key == end( $takekeys ) &&
+                        empty( Clock::where( 'member_id', $request->id )->where( 'status', '休憩入' )
+                        ->whereDate( 'clock', $date )->orderBy( 'clock', 'asc' )->get()[ $j+1 ] ) ){
+
+                        // Clockテーブル
+                        $clock = [
+                            'member_id' => $request->id,
+                            'clock' => CarbonImmutable::parse( $year . '-' . $month . '-' . $day . ' ' . $value ),
+                            'status' => '休憩入',
+                            'created_at' => CarbonImmutable::now()
+                        ];
+                        Clock::create( $clock );
+
+                        // Correctionテーブル
+                        $breaks[ $key ] = $year . '-' . $month . '-' . $day . ' ' . $value . ':00';
+                    }
+                }
+            }
+
+            // 'back'から始まるキーのとき
+            elseif( strpos( $key, 'back' ) === 0 ){
+
+                // backの$valueが00:00のとき
+                if( $value == '00:00' ){
+                    // 最後のキーのとき
+                    if( $key == end( $backkeys ) ){
+                        // takeが00:00のとき
+                        if( $request->validated()[ end( $takekeys ) ] == '00:00' ){
+                        }
+                        // takeに時間の登録があるとき
+                        else{
+                            $breaks[ $key ] = NULL;
+                        }
+                    }
+                    // 最後のキーじゃなければNULL扱い
+                    else{
+                        $breaks[ $key ] = NULL;
+                    }
+                }
+                // $valueが00:00じゃないとき
+                else{
+                    // Clockに登録ののある休憩
+                    foreach( Clock::where( 'member_id', $request->id )->where( 'status', '休憩戻' )
+                                ->whereDate( 'clock', $date )->orderBy( 'clock', 'asc' )->get()
+                            as $j => $back ){
+
+                        // キーに振られた番号を見て(最後の文字)foreachと同じ番目の時だけ
+                        if( substr( $key, -1 ) == $i && ( $i == $j+1 ) ){
+                            // 申請された時間が登録されている時間から変更されているとき
+                            if( $value != $back['clock']->format('H:i') ){
+                                // Clockテーブル
+                                $clock = $back;
+                                $clock['clock'] = CarbonImmutable::parse( $year . '-' . $month . '-' . $day . ' ' . $value );
+                                $clock['updated_at'] = CarbonImmutable::now();
+                                $clock->save();
+
+                                // Correctionテーブル
+                                $breaks[ $key ] =
+                                    $year . '-' . $month . '-' . $day . ' ' . $value . ':00';
+                            }
+                            // 申請された時間が登録されている時間と同じとき
+                            else{
+                                $breaks[ $key ] = NULL;
+                            }
+                        }
+                    }
+                    // Clockに登録のない新しい休憩
+                    if( $key == end( $backkeys ) &&
+                        empty( Clock::where( 'member_id', $request->id )->where( 'status', '休憩戻' )
+                        ->whereDate( 'clock', $date )->orderBy( 'clock', 'asc' )->get()[ $j+1 ] ) ){
+
+                        // Clockテーブル
+                        $clock = [
+                            'member_id' => $request->id,
+                            'clock' => CarbonImmutable::parse( $year . '-' . $month . '-' . $day . ' ' . $value ),
+                            'status' => '休憩戻',
+                            'created_at' => CarbonImmutable::now()
+                        ];
+                        Clock::create( $clock );
+
+                        // Correctionテーブル
+                        $breaks[ $key ] = $year . '-' . $month . '-' . $day . ' ' . $value . ':00';
+                    }
+
+                    $i++;
+                }
+            }
+        }
+
+        // Correctionsデータベースに追加
+        $correction = [
+            'member_id' => $request->id,
+            'date' => $date,
+            'clockin' => $clockin,
+            'clockout' => $clockout,
+            'breaks' => $breaks,
+            'remarks' => $request->validated()['remarks'],
+            'approve' => '済'
+        ];
+        Correction::create( $correction );
+
+        return redirect( '/admin/users/' . $request->id . '/attendances' );
+    }
 
     // CSVエクスポート機能
     public function download( Request $request ){
@@ -235,7 +561,7 @@ class ProcessController extends Controller
         }
 
         $date = CarbonImmutable::parse( $request->date )->format('Y-m');
-        $response = new StreamedResponse(function () use ($csvHeader, $csvData) {
+        $response = new StreamedResponse( function () use ($csvHeader, $csvData) {
 
             $createCsvFile = fopen('php://output', 'w');
 

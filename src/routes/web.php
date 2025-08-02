@@ -17,12 +17,10 @@ Route::prefix('/admin')->group(function () {
         Route::get('', [Admin\LoginController::class, 'index'])->name('admin.login');
         // ログインする
         Route::post('', [Admin\LoginController::class, 'login']);
-
     });
 
     // ログアウトしてログイン画面にリダイレクト
     Route::get('/logout', [Admin\LoginController::class, 'logout']);
-
 });
 // 認証必要：未認証の場合にログインフォームにリダイレクト
 Route::prefix('/admin')->middleware('auth:administrators')->group(function () {
@@ -34,8 +32,13 @@ Route::prefix('/admin')->middleware('auth:administrators')->group(function () {
         // 日めくり
         Route::post('', [Admin\ProcessController::class, 'daily']);
 
-        // 勤怠詳細画面の表示
-        Route::get('/{id}/{date}', [Admin\DisplayController::class, 'detail']);
+        Route::prefix('/{id}/{date}')->group(function () {
+
+            // 勤怠詳細画面の表示
+            Route::get('', [Admin\DisplayController::class, 'detail']);
+            // 勤怠修正
+            Route::post('', [Admin\ProcessController::class, 'correct']);
+        });
     });
 
     Route::prefix('/requests')->group(function () {
@@ -64,8 +67,6 @@ Route::prefix('/admin')->middleware('auth:administrators')->group(function () {
             // 月めくり
             Route::post('', [Admin\ProcessController::class, 'monthly']);
         });
-
-
     });
 
     // CSV出力

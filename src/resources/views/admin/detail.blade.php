@@ -78,7 +78,6 @@
                             {{-- 翌日に退勤のデータがないとき --}}
                             @else
                                 <input type="text" name="clockout" value="00:00" />
-                                <input type="hidden" name="realout" value="">
                             @endif
                         @endif
                     {{-- この日に退勤のデータがないとき --}}
@@ -97,7 +96,6 @@
                         {{-- 翌日に退勤のデータがないとき --}}
                         @else
                             <input type="text" name="clockout" value="00:00" />
-                            <input type="hidden" name="realout" value="">
                         @endif
                     @endif
                 </td>

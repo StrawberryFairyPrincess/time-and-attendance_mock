@@ -81,10 +81,10 @@ class ProcessController extends Controller
         $takekeys = [];
         $backkeys = [];
         foreach( array_keys( $request->validated() ) as $key ){
-            if ( strpos( $key, 'take' ) !== false) {
+            if( strpos( $key, 'take' ) !== false ){
                 $takekeys[] = $key;
             }
-            elseif ( strpos( $key, 'back' ) !== false) {
+            elseif( strpos( $key, 'back' ) !== false ){
                 $backkeys[] = $key;
             }
         }
@@ -92,11 +92,13 @@ class ProcessController extends Controller
         $breaks = [];
         $i = 1; // キーtakeとbackの振り番号をみる
         foreach( $request->validated() as $key => $value ) {
+
             // キーが'clockin'のとき
             if( $key == 'clockin' ){
                 // 申請された時間が登録されている時間と同じとき
                 if( $value ==
-                    Clock::where( 'member_id', Auth::id() )->orderBy( 'clock', 'asc' )->whereDate( 'clock', $date )
+                    Clock::where( 'member_id', Auth::id() )
+                        ->whereDate( 'clock', $date )->orderBy( 'clock', 'asc' )
                         ->where( 'status', '出勤' )->first()['clock']->format('H:i') ){
                     $clockin = NULL;
                 }
@@ -106,6 +108,7 @@ class ProcessController extends Controller
                                 ' ' . $value );
                 }
             }
+
             // キーが'clockout'のとき
             elseif( $key == 'clockout' ){
                 // $valueが00:00のとき
@@ -169,8 +172,9 @@ class ProcessController extends Controller
                             }
                             // 申請された時間が登録されている時間から変更されているとき
                             else{
-                                $clockout = CarbonImmutable::parse( $year . '-' . $month . '-' . $day .
-                                            ' ' . $value );
+                                $clockout =
+                                    CarbonImmutable::parse( $year . '-' . $month . '-' . $day .
+                                                            ' ' . $value );
                             }
                         }
                         // 実際の打刻は日を跨いでいる
@@ -181,6 +185,7 @@ class ProcessController extends Controller
                     }
                 }
             }
+
             // 'take'から始まるキーのとき
             elseif( strpos( $key, 'take' ) === 0 ){
                 // takeの$valueが00:00のとき
@@ -202,10 +207,10 @@ class ProcessController extends Controller
                 }
                 // $valueが00:00じゃないとき
                 else{
-                    // Clockに登録ののある休憩
+                    // Clockに登録のある休憩
                     foreach( Clock::where( 'member_id', Auth::id() )->where( 'status', '休憩入' )
-                            ->orderBy( 'clock', 'asc' )->whereDate( 'clock', $date )
-                            ->get() as $j => $take ){
+                                ->whereDate( 'clock', $date )->orderBy( 'clock', 'asc' )->get()
+                            as $j => $take ){
                         // キーに振られた番号を見て(最後の文字)foreachと同じ番目の時だけ
                         if( substr( $key, -1 ) == $i && ( $i == $j+1 ) ){
                             // 申請された時間が登録されている時間と同じとき
@@ -224,6 +229,7 @@ class ProcessController extends Controller
                     }
                 }
             }
+
             // 'back'から始まるキーのとき
             elseif( strpos( $key, 'back' ) === 0 ){
                 // backの$valueが00:00のとき
@@ -245,10 +251,10 @@ class ProcessController extends Controller
                 }
                 // $valueが00:00じゃないとき
                 else{
-                    // Clockに登録ののある休憩
+                    // Clockに登録のある休憩
                     foreach( Clock::where( 'member_id', Auth::id() )->where( 'status', '休憩戻' )
-                            ->orderBy( 'clock', 'asc' )->whereDate( 'clock', $date )
-                            ->get() as $j => $back ){
+                                ->whereDate( 'clock', $date )->orderBy( 'clock', 'asc' )->get()
+                            as $j => $back ){
                         // キーに振られた番号を見て(最後の文字)foreachと同じ番目の時だけ
                         if( substr( $key, -1 ) == $i && ( $i == $j+1 ) ){
                             // 申請された時間が登録されている時間と同じとき
