@@ -100,6 +100,8 @@ PHPUnit環境構築
 
 ## 使用技術(実行環境)
 
+	・MacBook Retina, 2017
+	・macOS 13.7.6
 	・Laravel Framework 8.83.8
 	・PHP 7.4.9
 	・MySQL 8.0.26

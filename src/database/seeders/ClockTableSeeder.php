@@ -16,7 +16,6 @@ class ClockTableSeeder extends Seeder
      */
     public function run()
     {
-
         $today = CarbonImmutable::today();
 
         $k = 1;

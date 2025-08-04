@@ -18,7 +18,7 @@ class AdministratorSeeder extends Seeder
      */
     public function run()
     {
-        Administrator::truncate();
+        // Administrator::truncate();
 
         $administrators_data = [];
         for ($i = 1; $i <= 10; $i++) {

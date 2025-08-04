@@ -91,7 +91,6 @@ Route::prefix('')->group(function () {
 
     // ログアウトしてログイン画面にリダイレクト
     Route::get('/logout', [Controllers\LoginController::class, 'logout']);
-
 });
 // 認証必要：未認証の場合にログインフォームにリダイレクト
 Route::prefix('')->middleware(['auth.general:members', 'verified'])->group(function () {
@@ -122,7 +121,6 @@ Route::prefix('')->middleware(['auth.general:members', 'verified'])->group(funct
 
     // 申請一覧画面の表示
     Route::get('/stamp_correction_request/list', [Controllers\DisplayController::class, 'request']);
-
 });
 
 // メール認証
@@ -144,7 +142,6 @@ Route::prefix('/email')->group(function () {
             return redirect('/attendance');
         // })->middleware(['auth', 'signed'])->name('verification.verify');
         })->middleware(['auth.general:members', 'signed'])->name('verification.verify');
-
     });
 
     // メール確認の再送信
@@ -154,5 +151,4 @@ Route::prefix('/email')->group(function () {
         return back()->with('message', '認証メールを送信しました');
     // })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
     })->middleware(['auth.general:members', 'throttle:6,1'])->name('verification.send');
-
 });

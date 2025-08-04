@@ -18,7 +18,7 @@ class MemberSeeder extends Seeder
      */
     public function run()
     {
-        Member::truncate();
+        // Member::truncate();
 
         $member_data = [];
         for ($i = 1; $i <= 10; $i++) {
