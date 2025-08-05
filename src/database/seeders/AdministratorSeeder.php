@@ -21,16 +21,18 @@ class AdministratorSeeder extends Seeder
         // Administrator::truncate();
 
         $administrators_data = [];
-        for ($i = 1; $i <= 10; $i++) {
+        for( $i = 1; $i <= 10; $i++ ){
             $administrators_data[] = [
+                'id' => $i,
                 'email' => sprintf('admin%03d@example.com', $i),
                 'password' => sprintf('pass%04d', $i),
             ];
         }
 
         $faker = Factory::create('ja_JP');
-        foreach($administrators_data as $data) {
+        foreach( $administrators_data as $data ){
             $administrator = new Administrator();
+            $administrator->id = $data['id'];
             $administrator->name = $faker->name();
             $administrator->email = $data['email'];
             $administrator->password = Hash::make($data['password']);

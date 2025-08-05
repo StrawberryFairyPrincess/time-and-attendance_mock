@@ -17,14 +17,14 @@ class LoginController extends Controller
     }
 
     // ログイン処理
-    public function login(LoginRequest $request)
+    public function login( LoginRequest $request )
     {
         $credentials = $request->only([
             'email',
             'password'
         ]);
 
-        if (Auth::guard('administrators')->attempt($credentials)) {
+        if( Auth::guard('administrators')->attempt( $credentials ) ){
             // ログインしたら勤怠一覧画面にリダイレクト
             return redirect('/admin/attendances')->with([
                 'login_msg' => 'ログインしました', // ビューの{{ $message }}に展開
@@ -38,7 +38,7 @@ class LoginController extends Controller
     }
 
     // ログアウトを行ってログインフォームにリダイレクト
-    public function logout(Request $request)
+    public function logout( Request $request )
     {
         Auth::logout();
         $request->session()->invalidate();

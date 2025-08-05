@@ -21,16 +21,18 @@ class MemberSeeder extends Seeder
         // Member::truncate();
 
         $member_data = [];
-        for ($i = 1; $i <= 10; $i++) {
+        for( $i = 1; $i <= 10; $i++ ){
             $member_data[] = [
+                'id' => $i,
                 'email' => sprintf('member%03d@example.com', $i),
                 'password' => sprintf('pass%04d', $i),
             ];
         }
 
         $faker = Factory::create('ja_JP');
-        foreach($member_data as $data) {
+        foreach( $member_data as $data ){
             $member = new Member();
+            $member->id = $data['id'];
             $member->name = $faker->name();
             $member->email = $data['email'];
             $member->password = Hash::make($data['password']);

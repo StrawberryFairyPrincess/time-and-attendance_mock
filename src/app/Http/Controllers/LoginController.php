@@ -16,7 +16,7 @@ class LoginController extends Controller
     }
 
     // ログイン処理
-    public function login(LoginRequest $request)
+    public function login( LoginRequest $request )
     {
         $credentials = $request->only([
             'email',
@@ -24,7 +24,7 @@ class LoginController extends Controller
         ]);
         $guard = $request->guard;
 
-        if (Auth::guard('members')->attempt($credentials)) {
+        if( Auth::guard('members')->attempt( $credentials ) ){
             // ログインしたら出勤登録画面にリダイレクト
             return redirect('/attendance')->with([
                 'login_msg' => 'ログインしました', // ビューの{{ $message }}に展開
@@ -38,7 +38,7 @@ class LoginController extends Controller
     }
 
     // ログアウト処理
-    public function logout(Request $request)
+    public function logout( Request $request )
     {
         Auth::logout();
         $request->session()->invalidate();

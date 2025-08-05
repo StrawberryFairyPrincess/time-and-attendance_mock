@@ -59,7 +59,7 @@ class MailMemberTest extends TestCase
         $verificationUrl = URL::temporarySignedRoute(
             'verification.verify',
             now()->addMinutes(60),
-            ['id' => $member->id, 'hash' => sha1($member->getEmailForVerification())]
+            [ 'id' => $member->id, 'hash' => sha1( $member->getEmailForVerification() ) ]
         );
 
         // 現時点でメール認証していないことを確認
