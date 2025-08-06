@@ -41,7 +41,7 @@ class DisplayController extends Controller
             // 当日の出勤のデータがデータベースに存在して、
             // $memberの$tableのデータを作ってなかったら作る
             if( Clock::where( 'member_id', $member )->where( 'status', '出勤' )
-                    ->orderBy( 'clock', 'asc' )->whereDate( 'clock', $today )->exists()
+                    ->whereDate( 'clock', $today )->orderBy( 'clock', 'asc' )->exists()
                 && !isset( $table[ $member ] ) ){
 
                     $table[ $member ] = [

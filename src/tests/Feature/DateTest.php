@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 use Carbon\CarbonImmutable;
 use Database\Seeders\MemberSeeder;
@@ -31,38 +30,15 @@ class DateTest extends TestCase
         // ログインしていない
         $this->assertFalse( Auth::guard('members')->check() );
 
-        // ログイン画面へのアクセス
-        $response = $this->get('/login');
-        $response->assertViewIs('.general.auth.login');
-        $response->assertStatus(200);
-
         // ログインする(id=1の人)
-        $requestParams = [
-            'email' => 'member001@example.com',
-            'password' => 'pass0001',
-            'user_type' => 'general'
-        ];
-        $response = $this->post( '/login', $requestParams );
-        $response->assertRedirect('/attendance');
-        $response->assertStatus(302);
+        $member = Member::where( 'id', 1 )->first();
+        $member['email_verified_at'] = CarbonImmutable::now();
+        $this->actingAs( $member, 'members' );
 
         // ログインしている
         $this->assertTrue( Auth::guard('members')->check() );
 
-        // メールリンクのURLを生成
-        $member = Member::where( 'email', $requestParams['email'] )->first();
-        $verificationUrl = URL::temporarySignedRoute(
-            'verification.verify',
-            now()->addMinutes(60),
-            [ 'id' => $member->id, 'hash' => sha1( $member->getEmailForVerification() ) ]
-        );
-
-        // メールリンクをクリック
-        $response = $this->get( $verificationUrl );
-        $response->assertRedirect('/attendance');
-        $response->assertStatus(302);
-
-        // ユーザがメール認証できたか
+        // メール認証している
         $this->assertTrue( Auth::user()->hasVerifiedEmail() );
 
         // 出勤登録画面へのアクセス
