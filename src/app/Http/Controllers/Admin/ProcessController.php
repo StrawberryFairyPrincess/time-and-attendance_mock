@@ -60,6 +60,7 @@ class ProcessController extends Controller
         }
     }
 
+    // 修正申請を承認
     public function approve( Request $request ){
 
         // クエリパラメータから日付を取得

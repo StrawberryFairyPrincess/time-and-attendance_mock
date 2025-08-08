@@ -151,7 +151,7 @@ class CorrectionRequest extends FormRequest
             'back*.regex' => '休憩戻時刻は00:00〜23:59で入力してください',
             // 'take*.required_with' => '休憩入と休憩戻は両方入力してください',
             // 'back*.required_with' => '休憩入と休憩戻は両方入力してください',
-            'remarks.required' => '備考を入力してください',
+            'remarks.required' => '備考を記入してください',
             'remarks.string' => '備考は文字列で入力してください',
             'remarks.max' => '備考は255文字以内で入力してください',
         ];
