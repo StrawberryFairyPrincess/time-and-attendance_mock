@@ -46,44 +46,13 @@ class ListMemberTest extends TestCase
         // メール認証している
         $this->assertTrue( Auth::user()->hasVerifiedEmail() );
 
-        // 勤怠一覧画面に渡すパラメータ作成
-        $today = CarbonImmutable::now();
-        $clocks = Clock::where( 'member_id', Auth::id() )
-                    ->orderBy( 'clock', 'asc' )->get();
-        $table = [];
-        foreach( $clocks as $clock ){
-            if( !isset( $table[ $clock['clock']->isoFormat('YYYY/MM/DD') ] ) ){
-                $table[ $clock['clock']->isoFormat('YYYY/MM/DD') ] = [
-                    'clockin' => null,
-                    'clockout' => null,
-                    'break' => 0,
-                    'sum' => 0
-                ];
-            }
+        // 勤怠一覧画面へのアクセス
+        $response = $this->get('/attendance/list');
+        $response->assertViewIs('.general.index');
+        $response->assertStatus(200);
 
-            foreach( $table as $date => &$row ){
-                if( $date == $clock['clock']->isoFormat('YYYY/MM/DD') ){
-                    if( $clock['status'] == '出勤' ){
-                        $row['clockin'] = $clock['clock'];
-                    }
-                    elseif( $clock['status'] == '退勤' && $row['clockin'] != null ){
-                            $row['clockout'] = $clock['clock'];
-                            $row['sum'] = $row['clockin']->diffInSeconds( $row['clockout'] )
-                                - $row['break'];
-                    }
-                    elseif( $clock['status'] == '休憩入' ){
-                        $break = $clock['clock'];
-                    }
-                    elseif( $clock['status'] == '休憩戻' ){
-                        $row['break'] += $break->diffInSeconds( $clock['clock'] );
-                    }
-                    break;
-                }
-            }
-        }
-
-        // 勤怠一覧画面を文字列として取得
-        $contents = (string)$this->view( '/general/index', compact( 'today', 'table' ) );
+        // ビューを文字列として取得(タグ除去)
+        $contents = strip_tags( $response->getContent() );
 
         // 出勤09:00の出現回数とデータ数が等しいか
         $clockin = substr_count( $contents, '09:00' );

@@ -17,13 +17,13 @@ use App\Models\Clock;
 // use App\Models\Correction;
 
 
-class ListAdminTest extends TestCase
+class StaffAdminTest extends TestCase
 {
     // テスト後にデータベースをリセット
     use RefreshDatabase;
 
-    // 勤怠情報を全て表示
-    public function test_all()
+    // スタッフ一覧画面におけるおける全一般ユーザの表示
+    public function test_staff()
     {
         // 管理者のデータを作成
         $this->seed( AdministratorSeeder::class );
@@ -50,52 +50,100 @@ class ListAdminTest extends TestCase
         // ログインしている
         $this->assertTrue( Auth::guard('administrators')->check() );
 
-        // 勤怠一覧画面へアクセス
-        $response = $this->get( '/admin/attendances' );
-        $response->assertViewIs('admin.index');
+        // スタッフ一覧画面へアクセス
+        $response = $this->get( '/admin/users' );
+        $response->assertViewIs('.admin.staff');
         $response->assertStatus(200);
+
+        // 全一般ユーザの名前とメールアドレスの表示
+        foreach( Member::all() as $member ){
+            $response->assertSeeText( $member['name'] );
+            $response->assertSeeText( $member['email'] );
+        }
+    }
+
+    // スタッフ別勤怠一覧画面
+    public function test_list()
+    {
+        // 管理者のデータを作成
+        $this->seed( AdministratorSeeder::class );
+        $this->assertDatabaseHas('administrators', [
+            'email' => 'admin001@example.com',
+        ]);
+
+        // 一般ユーザのデータを作成
+        $this->seed( MemberSeeder::class );
+        $this->assertDatabaseHas('members', [
+            'email' => 'member001@example.com',
+        ]);
+
+        // 打刻データを作成
+        $this->seed( ClockTableSeeder::class );
+
+        // ログインしていない
+        $this->assertFalse( Auth::guard('administrators')->check() );
+
+        // ログインする(id=1の人)
+        $administrator = Administrator::where( 'id', 1 )->first();
+        $this->actingAs( $administrator, 'administrators' );
+
+        // ログインしている
+        $this->assertTrue( Auth::guard('administrators')->check() );
+
+        // スタッフ別勤怠一覧画面へアクセス
+        $response = $this->get( '/admin/users/1/attendances' );
+        $response->assertViewIs('.admin.individual');
+        $response->assertStatus(200);
+
+        // 選択したスタッフの名前が表示されているか
+        $response->assertSeeText( Member::where( 'id', 1 )->first()['name'] );
 
         // ビューを文字列として取得(タグ除去)
         $contents = strip_tags( $response->getContent() );
-
-        // 打刻したユーザ名が全て表示されているか
-        foreach( Clock::where( 'status', '出勤' )->whereDate( 'clock', CarbonImmutable::now() )
-                    ->orderBy( 'clock', 'asc' )->get()
-                as $clock ){
-            $this->assertStringContainsString( $clock->member->name, $contents );
-        }
 
         // 出勤09:00の出現回数とデータ数が等しいか
         $clockin = substr_count( $contents, '09:00' );
         $this->assertEquals(
             $clockin,
-            10
+            Clock::where( 'member_id', 1 )->where( 'status', '出勤' )
+                ->whereYear( 'clock', CarbonImmutable::now()->year )
+                ->whereMonth( 'clock', CarbonImmutable::now()->month )
+                ->count()
         );
 
         // 退勤19:00の出現回数とデータ数が等しいか
         $clockout = substr_count( $contents, '19:00' );
         $this->assertEquals(
             $clockout,
-            10
+            Clock::where( 'member_id', 1 )->where( 'status', '退勤' )
+                ->whereYear( 'clock', CarbonImmutable::now()->year )
+                ->whereMonth( 'clock', CarbonImmutable::now()->month )
+                ->count()
         );
 
         // 休憩時間2時間の出現回数とデータ数が等しいか
         $break = substr_count( $contents, '02:00' );
         $this->assertEquals(
             $break,
-            10
+            Clock::where( 'member_id', 1 )->where( 'status', '出勤' )
+                ->whereYear( 'clock', CarbonImmutable::now()->year )
+                ->whereMonth( 'clock', CarbonImmutable::now()->month )
+                ->count()
         );
 
         // 勤務時間8時間の出現回数とデータ数が等しいか
         $sum = substr_count( $contents, '08:00' );
         $this->assertEquals(
             $sum,
-            10
+            Clock::where( 'member_id', 1 )->where( 'status', '出勤' )
+                ->whereYear( 'clock', CarbonImmutable::now()->year )
+                ->whereMonth( 'clock', CarbonImmutable::now()->month )
+                ->count()
         );
     }
 
-    // 今日
-    public function test_today()
+    // スタッフ別勤怠一覧画面(前月)
+    public function test_last()
     {
         // 管理者のデータを作成
         $this->seed( AdministratorSeeder::class );
@@ -122,17 +170,26 @@ class ListAdminTest extends TestCase
         // ログインしている
         $this->assertTrue( Auth::guard('administrators')->check() );
 
-        // 勤怠一覧画面へアクセス
-        $response = $this->get( '/admin/attendances' );
-        $response->assertViewIs('admin.index');
+        // スタッフ別勤怠一覧画面へアクセス
+        $response = $this->get( '/admin/users/1/attendances' );
+        $response->assertViewIs('.admin.individual');
         $response->assertStatus(200);
 
-        // 今日の日付の表示
-        $response->assertSeeText( CarbonImmutable::now()->isoFormat('YYYY/MM/DD') );
+        // 前月ボタンを押す
+        $response = $this->post( '/admin/users/1/attendances', [ 'sub' => '前月' ] );
+        $response->assertRedirect( '/admin/users/1/attendances' );
+        $response->assertStatus(302);
+        $response = $this->get( '/admin/users/1/attendances' );
+        $response->assertViewIs('.admin.individual');
+        $response->assertStatus(200);
+
+        // 前の月が表示されているか
+        $date = CarbonImmutable::now()->subMonth();
+        $response->assertSeeText( $date->isoFormat('YYYY/MM') );
     }
 
-    // 前日
-    public function test_yesterday()
+    // スタッフ別勤怠一覧画面(翌月)
+    public function test_next()
     {
         // 管理者のデータを作成
         $this->seed( AdministratorSeeder::class );
@@ -159,25 +216,26 @@ class ListAdminTest extends TestCase
         // ログインしている
         $this->assertTrue( Auth::guard('administrators')->check() );
 
-        // 勤怠一覧画面へアクセス
-        $response = $this->get( '/admin/attendances' );
-        $response->assertViewIs('admin.index');
+        // スタッフ別勤怠一覧画面へアクセス
+        $response = $this->get( '/admin/users/1/attendances' );
+        $response->assertViewIs('.admin.individual');
         $response->assertStatus(200);
 
-        // 前日のボタンを押す
-        $response = $this->post( '/admin/attendances', [ 'sub' => '前日' ] );
-        $response->assertRedirect('/admin/attendances');
+        // 翌月ボタンを押す
+        $response = $this->post( '/admin/users/1/attendances', [ 'add' => '翌月' ] );
+        $response->assertRedirect( '/admin/users/1/attendances' );
         $response->assertStatus(302);
-        $response = $this->get('/admin/attendances');
-        $response->assertViewIs('admin.index');
+        $response = $this->get( '/admin/users/1/attendances' );
+        $response->assertViewIs('.admin.individual');
         $response->assertStatus(200);
 
-        // 前日の日付の表示
-        $response->assertSeeText( CarbonImmutable::now()->subDay()->isoFormat('YYYY/MM/DD') );
+        // 次の月が表示されているか
+        $date = CarbonImmutable::now()->addMonth();
+        $response->assertSeeText( $date->isoFormat('YYYY/MM') );
     }
 
-    // 翌日
-    public function test_tomorrow()
+    // 勤怠詳細画面
+    public function test_detail()
     {
         // 管理者のデータを作成
         $this->seed( AdministratorSeeder::class );
@@ -204,20 +262,14 @@ class ListAdminTest extends TestCase
         // ログインしている
         $this->assertTrue( Auth::guard('administrators')->check() );
 
-        // 勤怠一覧画面へアクセス
-        $response = $this->get( '/admin/attendances' );
-        $response->assertViewIs('admin.index');
+        // 詳細ボタンをクリック(勤怠詳細画面へアクセス)
+        $response = $this->get( '/admin/attendances/1/' . CarbonImmutable::now()->isoFormat('YYYYMMDD') );
+        $response->assertViewIs('.admin.detail');
         $response->assertStatus(200);
 
-        // 翌日のボタンを押す
-        $response = $this->post( '/admin/attendances', [ 'add' => '翌日' ] );
-        $response->assertRedirect('/admin/attendances');
-        $response->assertStatus(302);
-        $response = $this->get('/admin/attendances');
-        $response->assertViewIs('admin.index');
-        $response->assertStatus(200);
-
-        // 翌日の日付の表示
-        $response->assertSeeText( CarbonImmutable::now()->addDay()->isoFormat('YYYY/MM/DD') );
+        // クリックした日付に遷移するか
+        $response->assertSeeText( Member::where( 'id', 1 )->first()['name'] );
+        $response->assertSeeText( CarbonImmutable::now()->isoFormat('YYYY年') );
+        $response->assertSeeText( CarbonImmutable::now()->isoFormat('MM月DD日') );
     }
 }
