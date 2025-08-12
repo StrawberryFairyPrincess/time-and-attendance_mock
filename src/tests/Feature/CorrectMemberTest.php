@@ -74,7 +74,7 @@ class CorrectMemberTest extends TestCase
 
         // バリデーションメッセージの確認
         $response->assertInvalid([
-            'clockin' => '出勤時間が不適切な値です',
+            'clockin' => '出勤時間もしくは退勤時間が不適切な値です',
         ]);
 
         // 入力項目(休憩入時間が退勤時間より後)

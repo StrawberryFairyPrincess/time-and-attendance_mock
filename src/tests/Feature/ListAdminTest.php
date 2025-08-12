@@ -148,7 +148,7 @@ class ListAdminTest extends TestCase
         // ログインしている
         $this->assertTrue( Auth::guard('administrators')->check() );
 
-        // 申請一覧画面(承認待ち)へアクセス
+        // 勤怠一覧画面へアクセス
         $response = $this->get( '/admin/attendances' );
         $response->assertViewIs('admin.index');
         $response->assertStatus(200);
@@ -185,7 +185,7 @@ class ListAdminTest extends TestCase
         // ログインしている
         $this->assertTrue( Auth::guard('administrators')->check() );
 
-        // 申請一覧画面(承認待ち)へアクセス
+        // 勤怠一覧画面へアクセス
         $response = $this->get( '/admin/attendances' );
         $response->assertViewIs('admin.index');
         $response->assertStatus(200);
@@ -230,7 +230,7 @@ class ListAdminTest extends TestCase
         // ログインしている
         $this->assertTrue( Auth::guard('administrators')->check() );
 
-        // 申請一覧画面(承認待ち)へアクセス
+        // 勤怠一覧画面へアクセス
         $response = $this->get( '/admin/attendances' );
         $response->assertViewIs('admin.index');
         $response->assertStatus(200);

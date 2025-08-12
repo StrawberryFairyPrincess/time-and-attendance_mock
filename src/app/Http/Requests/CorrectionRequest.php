@@ -99,7 +99,7 @@ class CorrectionRequest extends FormRequest
             // clockinがclockoutより未来だとエラー
             if( $clockin != '00:00' && $clockout != '00:00' &&
                 $clockin->greaterThan( $clockout ) ){
-                $validator->errors()->add( 'clockin', '出勤時間が不適切な値です' );
+                $validator->errors()->add( 'clockin', '出勤時間もしくは退勤時間が不適切な値です' );
             }
 
             foreach( $take as $index => $t ){
