@@ -247,7 +247,7 @@ class CorrectMemberTest extends TestCase
         $response->assertSeeText( 'PHPUnit test' );
     }
 
-    // 申請一覧画面
+    // 修正申請承認と申請一覧画面
     public function test_list()
     {
         // 管理者のデータを作成
@@ -290,14 +290,14 @@ class CorrectMemberTest extends TestCase
             $response->assertSeeText( $correction->date->isoFormat('YYYY/MM/DD') );
         }
 
-        // 申請された初めの5件を承認済みにする
+        // 申請された初めの5件を承認する
         for( $i=0; $i<5; $i++ ){
             // 修正申請承認画面へアクセス(詳細ボタン)
             $response = $this->get( '/admin/requests/' . $corrections[$i]->member['id'] . '/' . $corrections[$i]['date']->isoFormat('YYYYMMDD') );
             $response->assertViewIs('.admin.approve');
             $response->assertStatus(200);
 
-            // 入力項目送信
+            // 承認ボタンを押す
             $response = $this->post(
                 '/admin/requests/' . $corrections[$i]->member['id'] . '/' . $corrections[$i]['date']->isoFormat('YYYYMMDD'),
                 [ 'realout' =>

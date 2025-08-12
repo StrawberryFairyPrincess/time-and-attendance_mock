@@ -23,9 +23,9 @@ class Clock extends Model
         'clock' => 'datetime',
     ];
 
-    // // membersテーブルとのリレーション定義(多対1)
-    // public function member()
-    // {
-    //     return $this->belongsTo(Member::class);
-    // }
+    // membersテーブルとのリレーション定義(多対1)
+    public function member()
+    {
+        return $this->belongsTo(Member::class);
+    }
 }
