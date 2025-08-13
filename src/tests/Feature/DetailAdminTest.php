@@ -51,7 +51,8 @@ class DetailAdminTest extends TestCase
         $this->assertTrue( Auth::guard('administrators')->check() );
 
         // 勤怠詳細画面へアクセス
-        $response = $this->get( '/admin/attendances/1/' . CarbonImmutable::now()->isoFormat('YYYYMMDD') );
+        $response =
+            $this->get( '/admin/attendances/1/' . CarbonImmutable::now()->isoFormat('YYYYMMDD') );
         $response->assertViewIs('.admin.detail');
         $response->assertStatus(200);
 
@@ -94,7 +95,8 @@ class DetailAdminTest extends TestCase
         $this->assertTrue( Auth::guard('administrators')->check() );
 
         // 勤怠詳細画面へアクセス
-        $response = $this->get( '/admin/attendances/1/' . CarbonImmutable::now()->isoFormat('YYYYMMDD') );
+        $response =
+            $this->get( '/admin/attendances/1/' . CarbonImmutable::now()->isoFormat('YYYYMMDD') );
         $response->assertViewIs('.admin.detail');
         $response->assertStatus(200);
 

@@ -263,7 +263,8 @@ class StaffAdminTest extends TestCase
         $this->assertTrue( Auth::guard('administrators')->check() );
 
         // 詳細ボタンをクリック(勤怠詳細画面へアクセス)
-        $response = $this->get( '/admin/attendances/1/' . CarbonImmutable::now()->isoFormat('YYYYMMDD') );
+        $response =
+            $this->get( '/admin/attendances/1/' . CarbonImmutable::now()->isoFormat('YYYYMMDD') );
         $response->assertViewIs('.admin.detail');
         $response->assertStatus(200);
 
