@@ -23,6 +23,13 @@ Laravel環境構築
 		DB_USERNAME=laravel_user
 		DB_PASSWORD=laravel_pass
 		```
+		Mailhogの設定
+		``` text
+		MAIL_HOST=mail
+		MAIL_PORT=1025
+		MAIL_FROM_ADDRESS=info@time&attendance.com
+		MAIL_FROM_NAME=退勤管理模擬案件
+		```
 	5. アプリケーションキーの作成
 		``` bash
 		php artisan key:generate
@@ -34,17 +41,6 @@ Laravel環境構築
 	7. シーディングの実行
 		``` bash
 		php artisan db:seed
-		```
-
-
-Mailhogの設定
-
-	.envの修正
-		``` text
-		MAIL_HOST=mail
-		MAIL_PORT=1025
-		MAIL_FROM_ADDRESS=info@time&attendance.com
-		MAIL_FROM_NAME=退勤管理模擬案件
 		```
 
 
@@ -96,6 +92,71 @@ PHPUnit環境構築
 		``` bash
 		php artisan migrate --env=testing
 		```
+	9. テスト実行コード
+		1 認証機能（一般ユーザー）
+			``` bash
+			vendor/bin/phpunit tests/Feature/RegisterMemberTest.php
+			```
+		2 ログイン認証機能（一般ユーザー）
+			``` bash
+			vendor/bin/phpunit tests/Feature/LoginMemberTest.php
+			```
+		3 ログイン認証機能（管理者）
+			``` bash
+			vendor/bin/phpunit tests/Feature/LoginAdminTest.php
+			```
+		4 日時取得機能
+			``` bash
+			vendor/bin/phpunit tests/Feature/DateTest.php
+			```
+		5 ステータス確認機能
+			``` bash
+			vendor/bin/phpunit tests/Feature/StatusTest.php
+			```
+		6 出勤機能
+			``` bash
+			vendor/bin/phpunit tests/Feature/ClockInTest.php
+			```
+		7 休憩機能
+			``` bash
+			vendor/bin/phpunit tests/Feature/BreakTest.php
+			```
+		8 退勤機能
+			``` bash
+			vendor/bin/phpunit tests/Feature/ClockOutTest.php
+			```
+		9 勤怠一覧情報取得機能（一般ユーザー）
+			``` bash
+			vendor/bin/phpunit tests/Feature/ListMemberTest.php
+			```
+		10 勤怠詳細情報取得機能（一般ユーザー）
+			``` bash
+			vendor/bin/phpunit tests/Feature/DetailMemberTest.php
+			```
+		11 勤怠詳細情報修正機能（一般ユーザー）
+			``` bash
+			vendor/bin/phpunit tests/Feature/CorrectMemberTest.php
+			```
+		12 勤怠一覧情報取得機能（管理者）
+			``` bash
+			vendor/bin/phpunit tests/Feature/ListAdminTest.php
+			```
+		13 勤怠詳細情報取得・修正機能（管理者）
+			``` bash
+			vendor/bin/phpunit tests/Feature/DetailAdminTest.php
+			```
+		14 ユーザー情報取得機能（管理者）
+			``` bash
+			vendor/bin/phpunit tests/Feature/StaffAdminTest.php
+			```
+		15 勤怠情報修正機能（管理者）
+			``` bash
+			vendor/bin/phpunit tests/Feature/CorrectAdminTest.php
+			```
+		16 メール認証機能
+			``` bash
+			vendor/bin/phpunit tests/Feature/MailMemberTest.php
+			```
 
 
 ## 使用技術(実行環境)
@@ -129,6 +190,7 @@ PHPUnit環境構築
 	・一般ユーザ
 		ユーザID: member001@example.com
 		パスワード: pass0001
+		※ログインしたら「認証メールを再送する」を押して承認を完了してください
 
 
 ## バリデーションメッセージについて
