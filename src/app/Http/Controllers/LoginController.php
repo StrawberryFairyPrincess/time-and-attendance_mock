@@ -33,7 +33,7 @@ class LoginController extends Controller
 
         return back()->withErrors([
             // 'login' => ['ログインに失敗しました'], // ビューの{{ $error }}に展開
-            'password' => 'ログインに失敗しました',
+            'password' => 'ログイン情報が登録されていません',
         ]);
     }
 
